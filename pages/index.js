@@ -60,7 +60,9 @@ export default function Home() {
       ]);
       setMatches(fxRes.matches || []);
       setPickStats(statsRes.stats || {});
-      setLeaderboard(lbRes);
+      setLeaderboard({ leaderboard: lbRes.leaderboard || [], botPoints: lbRes.botPoints || 0 });
+      if (fxRes.error) setNotice("Không lấy được lịch thi đấu thật (" + (fxRes.detail || fxRes.error) + "). Kiểm tra lại FOOTBALL_DATA_API_KEY trên Vercel.");
+      else if (lbRes.error) setNotice("Không tính được leaderboard (" + (lbRes.detail || lbRes.error) + ").");
 
       if (session) {
         const { data } = await supabase
