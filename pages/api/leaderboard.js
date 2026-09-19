@@ -10,7 +10,7 @@ export default async function handler(req, res) {
         .from("predictions")
         .select("user_id, match_id, predicted_result, profiles(display_name)"),
     ]);
-    if (error) throw error;
+    if (error) throw new Error(error.message || JSON.stringify(error));
 
     const finished = matches.filter((m) => m.status === "finished");
     const resultOf = {};
@@ -35,6 +35,6 @@ export default async function handler(req, res) {
     const leaderboard = Object.values(totals).sort((a, b) => b.points - a.points);
     res.status(200).json({ leaderboard, botPoints });
   } catch (e) {
-    res.status(500).json({ error: "leaderboard_failed", detail: String(e) });
+    res.status(500).json({ error: "leaderboard_failed", detail: e?.message || String(e) });
   }
 }
