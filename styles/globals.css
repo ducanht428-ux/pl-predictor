@@ -97,3 +97,15 @@ body {
   font-weight: 700; font-size: 15px;
 }
 .score-save-btn { flex: 1; margin-left: 6px; }
+.motm-block { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.motm-row { display: flex; gap: 8px; margin-top: 6px; }
+.motm-input {
+  flex: 1; padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--bg-alt); color: var(--text); font-size: 13px;
+}
+.motm-vote-btn { flex: none; padding: 8px 14px; }
+.motm-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.motm-chip {
+  font-size: 11px; background: var(--bg-alt); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 10px; color: var(--text-dim);
+}
