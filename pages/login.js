@@ -26,6 +26,17 @@ export default function Login() {
   return (
     <div className="auth-wrap">
       <div className="card auth-card">
+        <svg viewBox="0 0 240 200" className="hero-illustration" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="120" cy="180" rx="80" ry="10" fill="var(--border)" opacity="0.6" />
+          <circle cx="118" cy="50" r="17" fill="var(--accent)" />
+          <path d="M100 68 Q120 58 138 70 L143 122 Q118 132 98 122 Z" fill="var(--accent)" />
+          <path d="M98 80 L72 90 L75 100 L104 93 Z" fill="var(--accent)" />
+          <path d="M138 80 L162 72 L165 82 L141 92 Z" fill="var(--accent)" />
+          <rect x="103" y="120" width="15" height="50" rx="7" fill="var(--accent)" />
+          <path d="M126 120 L160 140 L172 130 L180 140 L160 158 L118 136 Z" fill="var(--accent)" />
+          <circle cx="188" cy="146" r="13" fill="var(--away)" />
+          <path d="M188 137 L194 141 L192 148 L184 148 L182 141 Z" fill="var(--bg-card)" />
+        </svg>
         <h1 className="title">⚽ PL Predictor</h1>
         <p className="subtitle">Dự đoán mỗi vòng đấu, so tài với thuật toán, mời bạn bè cùng chơi.</p>
         {sent ? (
