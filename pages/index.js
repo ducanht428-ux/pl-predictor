@@ -22,6 +22,9 @@ export default function Home() {
   const [myPicks, setMyPicks] = useState({}); // matchId -> { result, home, away }
   const [scoreInputs, setScoreInputs] = useState({}); // matchId -> { home, away } (draft, before saving)
   const [pickStats, setPickStats] = useState({});
+  const [motmStats, setMotmStats] = useState({}); // matchId -> { playerName: count }
+  const [myMotm, setMyMotm] = useState({}); // matchId -> playerName
+  const [motmDrafts, setMotmDrafts] = useState({}); // matchId -> draft text
   const [leaderboard, setLeaderboard] = useState({ leaderboard: [], botPoints: 0 });
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
@@ -56,13 +59,15 @@ export default function Home() {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [fxRes, statsRes, lbRes] = await Promise.all([
+      const [fxRes, statsRes, lbRes, motmRes] = await Promise.all([
         fetch("/api/fixtures?competition=" + competition).then((r) => r.json()),
         fetch("/api/pick-stats").then((r) => r.json()),
         fetch("/api/leaderboard").then((r) => r.json()),
+        fetch("/api/motm-stats").then((r) => r.json()),
       ]);
       setMatches(fxRes.matches || []);
       setPickStats(statsRes.stats || {});
+      setMotmStats(motmRes.stats || {});
       setLeaderboard({ leaderboard: lbRes.leaderboard || [], botPoints: lbRes.botPoints || 0 });
       if (fxRes.error) setNotice("Không lấy được lịch thi đấu thật (" + (fxRes.detail || fxRes.error) + "). Kiểm tra lại FOOTBALL_DATA_API_KEY trên Vercel.");
       else if (lbRes.error) setNotice("Không tính được leaderboard (" + (lbRes.detail || lbRes.error) + ").");
@@ -77,6 +82,14 @@ export default function Home() {
           picks[p.match_id] = { result: p.predicted_result, home: p.predicted_home, away: p.predicted_away };
         });
         setMyPicks(picks);
+
+        const { data: motmData } = await supabase
+          .from("motm_votes")
+          .select("match_id, player_name")
+          .eq("user_id", session.user.id);
+        const mine = {};
+        (motmData || []).forEach((v) => (mine[v.match_id] = v.player_name));
+        setMyMotm(mine);
       }
     } catch (e) {
       setNotice("Không tải được dữ liệu: " + String(e));
@@ -113,6 +126,25 @@ export default function Home() {
       setNotice(body.error === "locked" ? "Trận này đã bị khóa (trong vòng 8h trước giờ bóng lăn)." : "Không lưu được dự đoán, thử lại nhé.");
       loadAll(); // revert optimistic update to real state
       return;
+    }
+    loadAll();
+  }
+
+  async function submitMotm(matchId) {
+    const name = (motmDrafts[matchId] ?? myMotm[matchId] ?? "").trim();
+    if (!name) return;
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) { router.replace("/login"); return; }
+
+    setMyMotm((prev) => ({ ...prev, [matchId]: name })); // optimistic
+    const r = await fetch("/api/motm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ matchId, playerName: name }),
+    });
+    if (!r.ok) {
+      setNotice("Không lưu được bình chọn MOTM, thử lại nhé.");
     }
     loadAll();
   }
@@ -219,6 +251,32 @@ export default function Home() {
                         {mine.result === resultOf[m.id] ? "Đúng +3" : "Sai -1"}
                       </span>
                     ) : null}
+                  </div>
+                )}
+                {finishedMatch && (
+                  <div className="motm-block">
+                    <div className="small">⭐ Cầu thủ xuất sắc nhất trận</div>
+                    <div className="motm-row">
+                      <input
+                        className="motm-input"
+                        placeholder="Tên cầu thủ..."
+                        value={motmDrafts[m.id] ?? myMotm[m.id] ?? ""}
+                        onChange={(e) => setMotmDrafts((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                      />
+                      <button className="pick-btn selected motm-vote-btn" onClick={() => submitMotm(m.id)}>
+                        {myMotm[m.id] ? "Cập nhật" : "Bình chọn"}
+                      </button>
+                    </div>
+                    {motmStats[m.id] && Object.keys(motmStats[m.id]).length > 0 && (
+                      <div className="motm-list">
+                        {Object.entries(motmStats[m.id])
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 3)
+                          .map(([name, count]) => (
+                            <span key={name} className="motm-chip">{name} · {count} phiếu</span>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 {!finishedMatch && locked && <div className="dim small">🔒 Đã khóa dự đoán</div>}
