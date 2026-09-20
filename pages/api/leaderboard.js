@@ -1,4 +1,4 @@
-iimport { supabaseAdmin } from "../../lib/supabaseAdmin";
+import { supabaseAdmin } from "../../lib/supabaseAdmin";
 import { getFixtures, actualResult } from "../../lib/fixtures";
 import { botPredict } from "../../lib/botPredictor";
 
