@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Login() {
+  const router = useRouter();
   const [mode, setMode] = useState("signup"); // "signup" | "signin"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,20 +15,27 @@ export default function Login() {
     e.preventDefault();
     setErr("");
     setLoading(true);
+    let result;
     if (mode === "signup") {
       if (typeof window !== "undefined") {
         localStorage.setItem("pl_pending_name", name.trim().slice(0, 24));
       }
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) setErr(error.message);
-      // On success, Supabase either logs the user in immediately (if
-      // "Confirm email" is off) or the onAuthStateChange listener on
-      // the main page will pick up the session once it's created.
+      result = await supabase.auth.signUp({ email, password });
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setErr(error.message);
+      result = await supabase.auth.signInWithPassword({ email, password });
     }
-    setLoading(false);
+    if (result.error) {
+      setErr(result.error.message);
+      setLoading(false);
+      return;
+    }
+    if (result.data?.session) {
+      router.push("/"); // logged in immediately -- go straight to the app
+    } else {
+      // "Confirm email" is still on in Supabase, so no session yet.
+      setErr("Tài khoản đã tạo nhưng cần xác nhận email trước khi đăng nhập được.");
+      setLoading(false);
+    }
   }
 
   return (
