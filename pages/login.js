@@ -2,25 +2,31 @@ import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Login() {
+  const [mode, setMode] = useState("signup"); // "signup" | "signin"
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [sent, setSent] = useState(false);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setErr("");
-    if (typeof window !== "undefined") {
-      localStorage.setItem("pl_pending_name", name.trim().slice(0, 24));
+    setLoading(true);
+    if (mode === "signup") {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("pl_pending_name", name.trim().slice(0, 24));
+      }
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) setErr(error.message);
+      // On success, Supabase either logs the user in immediately (if
+      // "Confirm email" is off) or the onAuthStateChange listener on
+      // the main page will pick up the session once it's created.
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setErr(error.message);
     }
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
-      },
-    });
-    if (error) setErr(error.message);
-    else setSent(true);
+    setLoading(false);
   }
 
   return (
@@ -39,10 +45,9 @@ export default function Login() {
         </svg>
         <h1 className="title">⚽ PL Predictor</h1>
         <p className="subtitle">Dự đoán mỗi vòng đấu, so tài với thuật toán, mời bạn bè cùng chơi.</p>
-        {sent ? (
-          <p className="notice">Đã gửi link đăng nhập tới <b>{email}</b>. Mở email và bấm vào link để vào chơi.</p>
-        ) : (
-          <form onSubmit={handleLogin} className="auth-form">
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          {mode === "signup" && (
             <input
               placeholder="Tên hiển thị (vd: Minh_9)"
               value={name}
@@ -50,17 +55,39 @@ export default function Login() {
               onChange={(e) => setName(e.target.value)}
               required
             />
-            <input
-              type="email"
-              placeholder="Email của bạn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <button type="submit" className="pick-btn selected">Nhận link đăng nhập</button>
-            {err && <p className="error-text">{err}</p>}
-          </form>
-        )}
+          )}
+          <input
+            type="email"
+            placeholder="Email của bạn"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Mật khẩu (ít nhất 6 ký tự)"
+            value={password}
+            minLength={6}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" className="pick-btn selected" disabled={loading}>
+            {loading ? "Đang xử lý..." : mode === "signup" ? "Tạo tài khoản & vào chơi" : "Đăng nhập"}
+          </button>
+          {err && <p className="error-text">{err}</p>}
+        </form>
+
+        <p className="notice">
+          {mode === "signup" ? (
+            <>Đã có tài khoản?{" "}
+              <a href="#" onClick={(e) => { e.preventDefault(); setMode("signin"); setErr(""); }}>Đăng nhập</a>
+            </>
+          ) : (
+            <>Chưa có tài khoản?{" "}
+              <a href="#" onClick={(e) => { e.preventDefault(); setMode("signup"); setErr(""); }}>Tạo tài khoản</a>
+            </>
+          )}
+        </p>
       </div>
     </div>
   );
