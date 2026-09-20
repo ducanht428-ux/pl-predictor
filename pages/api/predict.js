@@ -4,10 +4,13 @@ import { lockTime } from "../../lib/fixtures";
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed" });
 
-  const { matchId, predictedResult, kickoff } = req.body || {};
-  if (!matchId || !["home", "draw", "away"].includes(predictedResult) || !kickoff) {
+  const { matchId, predictedHome, predictedAway, kickoff } = req.body || {};
+  const home = Number(predictedHome);
+  const away = Number(predictedAway);
+  if (!matchId || !Number.isInteger(home) || !Number.isInteger(away) || home < 0 || away < 0 || home > 30 || away > 30 || !kickoff) {
     return res.status(400).json({ error: "invalid_body" });
   }
+  const predictedResult = home > away ? "home" : home < away ? "away" : "draw";
 
   const token = (req.headers.authorization || "").replace("Bearer ", "");
   if (!token) return res.status(401).json({ error: "no_token" });
@@ -28,7 +31,7 @@ export default async function handler(req, res) {
   }
 
   const { error } = await supabase.from("predictions").upsert(
-    { user_id: userData.user.id, match_id: matchId, predicted_result: predictedResult },
+    { user_id: userData.user.id, match_id: matchId, predicted_result: predictedResult, predicted_home: home, predicted_away: away },
     { onConflict: "user_id,match_id" }
   );
   if (error) return res.status(500).json({ error: error.message });
