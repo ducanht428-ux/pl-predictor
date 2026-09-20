@@ -198,6 +198,13 @@ export default function Home() {
       {tab === "bot" && (
         <div className="stack">
           <div className="card">
+            <svg viewBox="0 0 100 100" className="trophy-icon" xmlns="http://www.w3.org/2000/svg">
+              <path d="M30 18h40v25a20 20 0 01-40 0z" fill="var(--accent)" />
+              <path d="M30 23h-13a11 11 0 0011 11h2z" fill="var(--accent)" />
+              <path d="M70 23h13a11 11 0 01-11 11h-2z" fill="var(--accent)" />
+              <rect x="45" y="63" width="10" height="15" fill="var(--accent)" />
+              <rect x="33" y="78" width="34" height="8" rx="2" fill="var(--accent)" />
+            </svg>
             <div className="small">🤖 Điểm của Bot</div>
             <div className="bot-score">{leaderboard.botPoints} điểm</div>
           </div>
