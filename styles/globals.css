@@ -88,3 +88,5 @@ body {
 }
 .error-text { color: var(--danger); font-size: 12px; }
 .notice { font-size: 13px; color: var(--text-dim); margin-top: 12px; }
+.hero-illustration { width: 100%; max-width: 220px; height: auto; display: block; margin: 0 auto 12px; }
+.trophy-icon { width: 40px; height: 40px; display: block; margin-bottom: 6px; }
