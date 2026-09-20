@@ -16,6 +16,8 @@ export default function Home() {
   const [session, setSession] = useState(null);
   const [displayName, setDisplayName] = useState("");
   const [tab, setTab] = useState("matches");
+  const [competition, setCompetition] = useState("PL");
+  const COMPETITIONS = { PL: "Premier League", PD: "La Liga", FL1: "Ligue 1", CL: "Champions League" };
   const [matches, setMatches] = useState([]);
   const [myPicks, setMyPicks] = useState({}); // matchId -> predicted_result
   const [pickStats, setPickStats] = useState({});
@@ -54,7 +56,7 @@ export default function Home() {
     setLoading(true);
     try {
       const [fxRes, statsRes, lbRes] = await Promise.all([
-        fetch("/api/fixtures").then((r) => r.json()),
+        fetch("/api/fixtures?competition=" + competition).then((r) => r.json()),
         fetch("/api/pick-stats").then((r) => r.json()),
         fetch("/api/leaderboard").then((r) => r.json()),
       ]);
@@ -77,11 +79,11 @@ export default function Home() {
       setNotice("Không tải được dữ liệu: " + String(e));
     }
     setLoading(false);
-  }, [session]);
+  }, [session, competition]);
 
   useEffect(() => {
     if (session) loadAll();
-  }, [session, loadAll]);
+  }, [session, competition, loadAll]);
 
   async function submitPick(matchId, kickoff, pick) {
     setNotice("");
@@ -134,6 +136,20 @@ export default function Home() {
           </button>
         ))}
       </div>
+
+      {tab === "matches" && (
+        <div className="tabs">
+          {Object.entries(COMPETITIONS).map(([code, label]) => (
+            <button
+              key={code}
+              className={"tab-btn" + (competition === code ? " active" : "")}
+              onClick={() => setCompetition(code)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {notice && <div className="notice-box">{notice}</div>}
       {loading && <p className="subtitle">Đang tải...</p>}
