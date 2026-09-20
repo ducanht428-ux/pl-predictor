@@ -1,16 +1,19 @@
-import { supabaseAdmin } from "../../lib/supabaseAdmin";
+iimport { supabaseAdmin } from "../../lib/supabaseAdmin";
 import { getFixtures, actualResult } from "../../lib/fixtures";
 import { botPredict } from "../../lib/botPredictor";
 
 export default async function handler(req, res) {
   try {
-    const [matches, { data: predictions, error }] = await Promise.all([
+    const [matches, predictionsRes, profilesRes] = await Promise.all([
       getFixtures(),
-      supabaseAdmin
-        .from("predictions")
-        .select("user_id, match_id, predicted_result, profiles(display_name)"),
+      supabaseAdmin.from("predictions").select("user_id, match_id, predicted_result"),
+      supabaseAdmin.from("profiles").select("id, display_name"),
     ]);
-    if (error) throw new Error(error.message || JSON.stringify(error));
+    if (predictionsRes.error) throw new Error(predictionsRes.error.message);
+    if (profilesRes.error) throw new Error(profilesRes.error.message);
+
+    const nameOf = {};
+    (profilesRes.data || []).forEach((p) => (nameOf[p.id] = p.display_name));
 
     const finished = matches.filter((m) => m.status === "finished");
     const resultOf = {};
@@ -23,11 +26,11 @@ export default async function handler(req, res) {
     });
 
     const totals = {};
-    (predictions || []).forEach((p) => {
+    (predictionsRes.data || []).forEach((p) => {
       const res = resultOf[p.match_id];
       if (!res) return; // match not finished yet, doesn't count
       const gain = p.predicted_result === res ? 3 : -1;
-      const name = p.profiles?.display_name || "Player";
+      const name = nameOf[p.user_id] || "Player";
       totals[p.user_id] = totals[p.user_id] || { name, points: 0 };
       totals[p.user_id].points += gain;
     });
