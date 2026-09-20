@@ -1,11 +1,11 @@
 import { supabaseAdmin } from "../../lib/supabaseAdmin";
-import { getFixtures, actualResult } from "../../lib/fixtures";
+import { getAllFixtures, actualResult } from "../../lib/fixtures";
 import { botPredict } from "../../lib/botPredictor";
 
 export default async function handler(req, res) {
   try {
     const [matches, predictionsRes, profilesRes] = await Promise.all([
-      getFixtures(),
+      getAllFixtures(),
       supabaseAdmin.from("predictions").select("user_id, match_id, predicted_result"),
       supabaseAdmin.from("profiles").select("id, display_name"),
     ]);
