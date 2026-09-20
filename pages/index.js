@@ -19,7 +19,8 @@ export default function Home() {
   const [competition, setCompetition] = useState("PL");
   const COMPETITIONS = { PL: "Premier League", PD: "La Liga", FL1: "Ligue 1", CL: "Champions League" };
   const [matches, setMatches] = useState([]);
-  const [myPicks, setMyPicks] = useState({}); // matchId -> predicted_result
+  const [myPicks, setMyPicks] = useState({}); // matchId -> { result, home, away }
+  const [scoreInputs, setScoreInputs] = useState({}); // matchId -> { home, away } (draft, before saving)
   const [pickStats, setPickStats] = useState({});
   const [leaderboard, setLeaderboard] = useState({ leaderboard: [], botPoints: 0 });
   const [loading, setLoading] = useState(true);
@@ -69,10 +70,12 @@ export default function Home() {
       if (session) {
         const { data } = await supabase
           .from("predictions")
-          .select("match_id, predicted_result")
+          .select("match_id, predicted_result, predicted_home, predicted_away")
           .eq("user_id", session.user.id);
         const picks = {};
-        (data || []).forEach((p) => (picks[p.match_id] = p.predicted_result));
+        (data || []).forEach((p) => {
+          picks[p.match_id] = { result: p.predicted_result, home: p.predicted_home, away: p.predicted_away };
+        });
         setMyPicks(picks);
       }
     } catch (e) {
@@ -85,17 +88,25 @@ export default function Home() {
     if (session) loadAll();
   }, [session, competition, loadAll]);
 
-  async function submitPick(matchId, kickoff, pick) {
+  async function submitPick(matchId, kickoff) {
     setNotice("");
+    const draft = scoreInputs[matchId];
+    if (!draft || draft.home === "" || draft.away === "" || draft.home == null || draft.away == null) {
+      setNotice("Nhập đủ tỉ số 2 đội trước khi lưu nhé.");
+      return;
+    }
+    const home = Number(draft.home);
+    const away = Number(draft.away);
     const { data } = await supabase.auth.getSession();
     const token = data?.session?.access_token;
     if (!token) { router.replace("/login"); return; }
 
-    setMyPicks((prev) => ({ ...prev, [matchId]: pick })); // optimistic
+    const result = home > away ? "home" : home < away ? "away" : "draw";
+    setMyPicks((prev) => ({ ...prev, [matchId]: { result, home, away } })); // optimistic
     const r = await fetch("/api/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ matchId, predictedResult: pick, kickoff }),
+      body: JSON.stringify({ matchId, predictedHome: home, predictedAway: away, kickoff }),
     });
     if (!r.ok) {
       const body = await r.json().catch(() => ({}));
@@ -163,6 +174,8 @@ export default function Home() {
             const showBars = locked || finishedMatch;
             const stats = pickStats[m.id] || { home: 0, draw: 0, away: 0, total: 0 };
             const pct = (side) => (stats.total ? Math.round((stats[side] / stats.total) * 100) : 0);
+            const editable = !locked && !finishedMatch;
+            const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
 
             return (
               <div className="card match-card" key={m.id}>
@@ -170,28 +183,42 @@ export default function Home() {
                   <span className="teams">{m.home} <span className="vs">vs</span> {m.away}</span>
                   <span className="kickoff">{fmtTime(m.kickoff)}</span>
                 </div>
-                <div className="pick-row">
-                  {["home", "draw", "away"].map((side) => (
-                    <button
-                      key={side}
-                      className={"pick-btn" + (mine === side ? " selected" : "")}
-                      disabled={locked || finishedMatch}
-                      onClick={() => submitPick(m.id, m.kickoff, side)}
-                    >
-                      {side === "home" ? m.home : side === "draw" ? "Hòa" : m.away}
+
+                {editable ? (
+                  <div className="score-row">
+                    <input
+                      type="number" min="0" max="30" className="score-input"
+                      value={draft.home}
+                      onChange={(e) => setScoreInputs((prev) => ({ ...prev, [m.id]: { ...draft, home: e.target.value } }))}
+                    />
+                    <span className="dim">-</span>
+                    <input
+                      type="number" min="0" max="30" className="score-input"
+                      value={draft.away}
+                      onChange={(e) => setScoreInputs((prev) => ({ ...prev, [m.id]: { ...draft, away: e.target.value } }))}
+                    />
+                    <button className="pick-btn selected score-save-btn" onClick={() => submitPick(m.id, m.kickoff)}>
+                      {mine ? "Cập nhật" : "Lưu dự đoán"}
                     </button>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="result-line">
+                    {mine ? (
+                      <>Bạn dự đoán: <b>{mine.home} - {mine.away}</b></>
+                    ) : (
+                      <span className="dim">Bạn chưa dự đoán</span>
+                    )}
+                  </div>
+                )}
+
                 {finishedMatch && (
                   <div className="result-line">
                     <b>{m.homeScore} - {m.awayScore}</b>{" "}
                     {mine ? (
-                      <span className={mine === resultOf[m.id] ? "ok" : "bad"}>
-                        {mine === resultOf[m.id] ? "Đúng +3" : "Sai -1"}
+                      <span className={mine.result === resultOf[m.id] ? "ok" : "bad"}>
+                        {mine.result === resultOf[m.id] ? "Đúng +3" : "Sai -1"}
                       </span>
-                    ) : (
-                      <span className="dim">Bạn chưa dự đoán</span>
-                    )}
+                    ) : null}
                   </div>
                 )}
                 {!finishedMatch && locked && <div className="dim small">🔒 Đã khóa dự đoán</div>}
