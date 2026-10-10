@@ -11,6 +11,16 @@ function isLocked(kickoffIso) {
   return Date.now() >= new Date(kickoffIso).getTime() - 8 * 3600 * 1000;
 }
 
+const PLAYER_AVATARS = [
+  "https://images.fotmob.com/image_resources/playerimages/737066.png", // Haaland
+  "https://images.fotmob.com/image_resources/playerimages/292462.png", // Salah
+  "https://images.fotmob.com/image_resources/playerimages/932260.png", // Saka
+  "https://images.fotmob.com/image_resources/playerimages/688224.png", // Rashford
+  "https://images.fotmob.com/image_resources/playerimages/1070732.png", // Cole Palmer
+  "https://images.fotmob.com/image_resources/playerimages/210252.png", // De Bruyne
+  "https://images.fotmob.com/image_resources/playerimages/183188.png", // Son Heung-Min
+];
+
 export default function Home() {
   const router = useRouter();
   const [session, setSession] = useState(null);
@@ -19,18 +29,17 @@ export default function Home() {
   const [competition, setCompetition] = useState("PL");
   const COMPETITIONS = { PL: "Premier League", PD: "La Liga", FL1: "Ligue 1", CL: "Champions League" };
   const [matches, setMatches] = useState([]);
-  const [myPicks, setMyPicks] = useState({}); // matchId -> { result, home, away }
-  const [scoreInputs, setScoreInputs] = useState({}); // matchId -> { home, away } (draft, before saving)
+  const [myPicks, setMyPicks] = useState({});
+  const [scoreInputs, setScoreInputs] = useState({});
   const [pickStats, setPickStats] = useState({});
-  const [motmStats, setMotmStats] = useState({}); // matchId -> { playerName: count }
-  const [myMotm, setMyMotm] = useState({}); // matchId -> playerName
-  const [motmDrafts, setMotmDrafts] = useState({}); // matchId -> draft text
+  const [motmStats, setMotmStats] = useState({});
+  const [myMotm, setMyMotm] = useState({});
+  const [motmDrafts, setMotmDrafts] = useState({});
   const [leaderboard, setLeaderboard] = useState({ leaderboard: [], botPoints: 0 });
-  const [realLeaderboard, setRealLeaderboard] = useState([]); // Danh sách lấy trực tiếp từ Supabase
+  const [realLeaderboard, setRealLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
 
-  // ---- auth ----
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) { router.replace("/login"); return; }
@@ -56,7 +65,6 @@ export default function Home() {
     }
   }
 
-  // ---- Fetch Leaderboard trực tiếp từ Supabase ----
   const fetchSupabaseLeaderboard = useCallback(async () => {
     try {
       const { data, error } = await supabase
@@ -69,11 +77,10 @@ export default function Home() {
         setRealLeaderboard(data);
       }
     } catch (err) {
-      console.error("Lỗi lấy dữ liệu bảng xếp hạng từ Supabase:", err);
+      console.error("Lỗi lấy dữ liệu bảng xếp hạng:", err);
     }
   }, []);
 
-  // ---- data loading ----
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -87,12 +94,7 @@ export default function Home() {
       setPickStats(statsRes.stats || {});
       setMotmStats(motmRes.stats || {});
       setLeaderboard({ leaderboard: lbRes.leaderboard || [], botPoints: lbRes.botPoints || 0 });
-      
-      // Tải bảng xếp hạng từ Supabase
       await fetchSupabaseLeaderboard();
-
-      if (fxRes.error) setNotice("Không lấy được lịch thi đấu thật (" + (fxRes.detail || fxRes.error) + "). Kiểm tra lại FOOTBALL_DATA_API_KEY trên Vercel.");
-      else if (lbRes.error) setNotice("Không tính được leaderboard (" + (lbRes.detail || lbRes.error) + ").");
 
       if (session) {
         const { data } = await supabase
@@ -137,7 +139,7 @@ export default function Home() {
     if (!token) { router.replace("/login"); return; }
 
     const result = home > away ? "home" : home < away ? "away" : "draw";
-    setMyPicks((prev) => ({ ...prev, [matchId]: { result, home, away } })); // optimistic
+    setMyPicks((prev) => ({ ...prev, [matchId]: { result, home, away } }));
     const r = await fetch("/api/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -145,8 +147,8 @@ export default function Home() {
     });
     if (!r.ok) {
       const body = await r.json().catch(() => ({}));
-      setNotice(body.error === "locked" ? "Trận này đã bị khóa (trong vòng 8h trước giờ bóng lăn)." : "Không lưu được dự đoán, thử lại nhé.");
-      loadAll(); // revert optimistic update
+      setNotice(body.error === "locked" ? "Trận này đã bị khóa." : "Không lưu được dự đoán.");
+      loadAll();
       return;
     }
     loadAll();
@@ -159,15 +161,12 @@ export default function Home() {
     const token = data?.session?.access_token;
     if (!token) { router.replace("/login"); return; }
 
-    setMyMotm((prev) => ({ ...prev, [matchId]: name })); // optimistic
-    const r = await fetch("/api/motm", {
+    setMyMotm((prev) => ({ ...prev, [matchId]: name }));
+    await fetch("/api/motm", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ matchId, playerName: name }),
     });
-    if (!r.ok) {
-      setNotice("Không lưu được bình chọn MOTM, thử lại nhé.");
-    }
     loadAll();
   }
 
@@ -184,21 +183,97 @@ export default function Home() {
     resultOf[m.id] = m.homeScore > m.awayScore ? "home" : m.homeScore < m.awayScore ? "away" : "draw";
   });
 
-  // Sử dụng dữ liệu Bảng xếp hạng linh hoạt (nếu API có trả về thì dùng API, không thì hiển thị từ Supabase)
   const displayLeaderboard = leaderboard.leaderboard.length > 0 
     ? leaderboard.leaderboard 
     : realLeaderboard.map((item) => ({ name: item.display_name || "Người chơi", points: item.total_points || 0 }));
 
   return (
     <div className="wrap">
+      {/* --- CSS ANIMATION NÂNG CAO --- */}
+      <style jsx global>{`
+        @keyframes floatUpDown {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        @keyframes neonGlow {
+          0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3), inset 0 0 15px rgba(168, 85, 247, 0.1); }
+          50% { box-shadow: 0 0 25px rgba(168, 85, 247, 0.7), inset 0 0 25px rgba(168, 85, 247, 0.3); }
+        }
+        @keyframes shimmerEffect {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wrap {
+          animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .player-float {
+          animation: floatUpDown 3.5s ease-in-out infinite;
+        }
+        .player-float:hover {
+          transform: scale(1.15) rotate(5deg) !important;
+          filter: drop-shadow(0 0 12px #a855f7);
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .pro-card {
+          position: relative;
+          background: linear-gradient(145deg, #1e1938 0%, #16122b 100%);
+          border: 1px solid rgba(168, 85, 247, 0.2);
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .pro-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(168, 85, 247, 0.8);
+          animation: neonGlow 2.5s infinite;
+        }
+        .shimmer-btn {
+          background: linear-gradient(90deg, #9333ea 0%, #c084fc 50%, #9333ea 100%);
+          background-size: 200% auto;
+          transition: 0.5s;
+        }
+        .shimmer-btn:hover {
+          background-position: right center;
+          box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+        }
+        .avatar-ring {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          border: 2px solid #c084fc;
+          background: #28214a;
+          object-fit: cover;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+      `}</style>
+
+      {/* Header */}
       <div className="header">
         <div>
-          <h1 className="title">⚽ PL Predictor</h1>
-          <p className="subtitle">Xin chào, {displayName}</p>
+          <h1 className="title" style={{ letterSpacing: "1px" }}>⚽ PL Predictor</h1>
+          <p className="subtitle">Xin chào, <span style={{ color: "#c084fc", fontWeight: "bold" }}>{displayName}</span></p>
         </div>
-        <button className="pick-btn" onClick={logout}>Đăng xuất</button>
+        <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
       </div>
 
+      {/* Banner Cầu Thủ Hoạt Họa Chất Lượng Cao */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", margin: "18px 0", flexWrap: "wrap" }}>
+        {PLAYER_AVATARS.map((url, idx) => (
+          <img 
+            key={idx} 
+            src={url} 
+            alt="Star Player" 
+            className="avatar-ring player-float" 
+            style={{ animationDelay: `${idx * 0.4}s` }}
+          />
+        ))}
+      </div>
+
+      {/* Tabs */}
       <div className="tabs">
         {[["matches", "Trận đấu"], ["bot", "Bot vs Bạn"], ["leaderboard", "Leaderboard"]].map(([k, label]) => (
           <button key={k} className={"tab-btn" + (tab === k ? " active" : "")} onClick={() => setTab(k)}>
@@ -222,11 +297,12 @@ export default function Home() {
       )}
 
       {notice && <div className="notice-box">{notice}</div>}
-      {loading && <p className="subtitle">Đang tải...</p>}
+      {loading && <p className="subtitle">Đang tải dữ liệu động...</p>}
 
+      {/* Matches Tab */}
       {tab === "matches" && (
         <div className="stack">
-          {matches.map((m) => {
+          {matches.map((m, index) => {
             const locked = isLocked(m.kickoff);
             const finishedMatch = m.status === "finished";
             const mine = myPicks[m.id];
@@ -235,12 +311,16 @@ export default function Home() {
             const pct = (side) => (stats.total ? Math.round((stats[side] / stats.total) * 100) : 0);
             const editable = !locked && !finishedMatch;
             const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
+            const avatarUrl = PLAYER_AVATARS[index % PLAYER_AVATARS.length];
 
             return (
-              <div className="card match-card" key={m.id}>
-                <div className="match-top">
-                  <span className="teams">{m.home} <span className="vs">vs</span> {m.away}</span>
-                  <span className="kickoff">{fmtTime(m.kickoff)}</span>
+              <div className="card match-card pro-card" key={m.id}>
+                <div className="match-top" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <img src={avatarUrl} alt="Player Icon" className="avatar-ring player-float" style={{ width: "38px", height: "38px" }} />
+                  <div style={{ flex: 1 }}>
+                    <span className="teams">{m.home} <span className="vs">vs</span> {m.away}</span>
+                    <div className="kickoff">{fmtTime(m.kickoff)}</div>
+                  </div>
                 </div>
 
                 {editable ? (
@@ -256,7 +336,7 @@ export default function Home() {
                       value={draft.away}
                       onChange={(e) => setScoreInputs((prev) => ({ ...prev, [m.id]: { ...draft, away: e.target.value } }))}
                     />
-                    <button className="pick-btn selected score-save-btn" onClick={() => submitPick(m.id, m.kickoff)}>
+                    <button className="pick-btn selected shimmer-btn score-save-btn" onClick={() => submitPick(m.id, m.kickoff)}>
                       {mine ? "Cập nhật" : "Lưu dự đoán"}
                     </button>
                   </div>
@@ -280,6 +360,7 @@ export default function Home() {
                     ) : null}
                   </div>
                 )}
+
                 {finishedMatch && (
                   <div className="motm-block">
                     <div className="small">⭐ Cầu thủ xuất sắc nhất trận</div>
@@ -290,7 +371,7 @@ export default function Home() {
                         value={motmDrafts[m.id] ?? myMotm[m.id] ?? ""}
                         onChange={(e) => setMotmDrafts((prev) => ({ ...prev, [m.id]: e.target.value }))}
                       />
-                      <button className="pick-btn selected motm-vote-btn" onClick={() => submitMotm(m.id)}>
+                      <button className="pick-btn selected shimmer-btn motm-vote-btn" onClick={() => submitMotm(m.id)}>
                         {myMotm[m.id] ? "Cập nhật" : "Bình chọn"}
                       </button>
                     </div>
@@ -306,13 +387,15 @@ export default function Home() {
                     )}
                   </div>
                 )}
+
                 {!finishedMatch && locked && <div className="dim small">🔒 Đã khóa dự đoán</div>}
+                
                 {showBars && (
                   <div className="bars">
                     {["home", "draw", "away"].map((side) => (
                       <div key={side}>
                         <div className="bar-label"><span>{side === "home" ? m.home : side === "draw" ? "Hòa" : m.away}</span><span>{pct(side)}%</span></div>
-                        <div className="bar-track"><div className="bar-fill" style={{ width: pct(side) + "%" }} /></div>
+                        <div className="bar-track"><div className="bar-fill" style={{ width: pct(side) + "%", transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)" }} /></div>
                       </div>
                     ))}
                   </div>
@@ -323,21 +406,18 @@ export default function Home() {
         </div>
       )}
 
+      {/* Bot Tab */}
       {tab === "bot" && (
         <div className="stack">
-          <div className="card">
-            <svg viewBox="0 0 100 100" className="trophy-icon" xmlns="http://www.w3.org/2000/svg">
-              <path d="M30 18h40v25a20 20 0 01-40 0z" fill="var(--accent)" />
-              <path d="M30 23h-13a11 11 0 0011 11h2z" fill="var(--accent)" />
-              <path d="M70 23h13a11 11 0 01-11 11h-2z" fill="var(--accent)" />
-              <rect x="45" y="63" width="10" height="15" fill="var(--accent)" />
-              <rect x="33" y="78" width="34" height="8" rx="2" fill="var(--accent)" />
-            </svg>
-            <div className="small">🤖 Điểm của Bot</div>
-            <div className="bot-score">{leaderboard.botPoints} điểm</div>
+          <div className="card pro-card" style={{ textAlign: "center", padding: "24px" }}>
+            <img src={PLAYER_AVATARS[0]} alt="Bot" className="avatar-ring player-float" style={{ width: "80px", height: "80px", margin: "0 auto 12px" }} />
+            <div className="small">🤖 Điểm của Bot AI</div>
+            <div className="bot-score" style={{ fontSize: "2.2rem", color: "#c084fc", fontWeight: "bold", textShadow: "0 0 15px rgba(192,132,252,0.5)" }}>
+              {leaderboard.botPoints} điểm
+            </div>
           </div>
           {displayLeaderboard.map((r, i) => (
-            <div className="card row-between" key={i}>
+            <div className="card row-between pro-card" key={i}>
               <span>{r.name}</span>
               <span className={r.points > leaderboard.botPoints ? "ok" : r.points === leaderboard.botPoints ? "dim" : "bad"}>
                 {r.points} điểm {r.points > leaderboard.botPoints ? "🔥 thắng Bot" : r.points === leaderboard.botPoints ? "= hòa Bot" : "thua Bot"}
@@ -347,18 +427,19 @@ export default function Home() {
         </div>
       )}
 
+      {/* Leaderboard Tab */}
       {tab === "leaderboard" && (
         <div className="stack">
           {displayLeaderboard.length === 0 && <p className="dim">Chưa có điểm nào.</p>}
           {displayLeaderboard.map((r, i) => (
-            <div className="card row-between" key={i}>
-              <span>
-                <span className="dim" style={{ marginRight: "8px", fontWeight: "bold" }}>
+            <div className="card row-between pro-card" key={i}>
+              <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontWeight: "bold", width: "28px", fontSize: "1.1rem" }}>
                   {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                 </span> 
                 {r.name}
               </span>
-              <span className="points">{r.points} điểm</span>
+              <span className="points" style={{ fontWeight: "bold", color: "#c084fc", fontSize: "1.1rem" }}>{r.points} điểm</span>
             </div>
           ))}
         </div>
