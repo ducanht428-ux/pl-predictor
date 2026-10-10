@@ -26,6 +26,7 @@ export default function Home() {
   const [myMotm, setMyMotm] = useState({}); // matchId -> playerName
   const [motmDrafts, setMotmDrafts] = useState({}); // matchId -> draft text
   const [leaderboard, setLeaderboard] = useState({ leaderboard: [], botPoints: 0 });
+  const [realLeaderboard, setRealLeaderboard] = useState([]); // Danh sách lấy trực tiếp từ Supabase
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
 
@@ -55,6 +56,23 @@ export default function Home() {
     }
   }
 
+  // ---- Fetch Leaderboard trực tiếp từ Supabase ----
+  const fetchSupabaseLeaderboard = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, total_points")
+        .order("total_points", { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        setRealLeaderboard(data);
+      }
+    } catch (err) {
+      console.error("Lỗi lấy dữ liệu bảng xếp hạng từ Supabase:", err);
+    }
+  }, []);
+
   // ---- data loading ----
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -69,6 +87,10 @@ export default function Home() {
       setPickStats(statsRes.stats || {});
       setMotmStats(motmRes.stats || {});
       setLeaderboard({ leaderboard: lbRes.leaderboard || [], botPoints: lbRes.botPoints || 0 });
+      
+      // Tải bảng xếp hạng từ Supabase
+      await fetchSupabaseLeaderboard();
+
       if (fxRes.error) setNotice("Không lấy được lịch thi đấu thật (" + (fxRes.detail || fxRes.error) + "). Kiểm tra lại FOOTBALL_DATA_API_KEY trên Vercel.");
       else if (lbRes.error) setNotice("Không tính được leaderboard (" + (lbRes.detail || lbRes.error) + ").");
 
@@ -95,7 +117,7 @@ export default function Home() {
       setNotice("Không tải được dữ liệu: " + String(e));
     }
     setLoading(false);
-  }, [session, competition]);
+  }, [session, competition, fetchSupabaseLeaderboard]);
 
   useEffect(() => {
     if (session) loadAll();
@@ -124,7 +146,7 @@ export default function Home() {
     if (!r.ok) {
       const body = await r.json().catch(() => ({}));
       setNotice(body.error === "locked" ? "Trận này đã bị khóa (trong vòng 8h trước giờ bóng lăn)." : "Không lưu được dự đoán, thử lại nhé.");
-      loadAll(); // revert optimistic update to real state
+      loadAll(); // revert optimistic update
       return;
     }
     loadAll();
@@ -161,6 +183,11 @@ export default function Home() {
   finished.forEach((m) => {
     resultOf[m.id] = m.homeScore > m.awayScore ? "home" : m.homeScore < m.awayScore ? "away" : "draw";
   });
+
+  // Sử dụng dữ liệu Bảng xếp hạng linh hoạt (nếu API có trả về thì dùng API, không thì hiển thị từ Supabase)
+  const displayLeaderboard = leaderboard.leaderboard.length > 0 
+    ? leaderboard.leaderboard 
+    : realLeaderboard.map((item) => ({ name: item.display_name || "Người chơi", points: item.total_points || 0 }));
 
   return (
     <div className="wrap">
@@ -309,7 +336,7 @@ export default function Home() {
             <div className="small">🤖 Điểm của Bot</div>
             <div className="bot-score">{leaderboard.botPoints} điểm</div>
           </div>
-          {leaderboard.leaderboard.map((r, i) => (
+          {displayLeaderboard.map((r, i) => (
             <div className="card row-between" key={i}>
               <span>{r.name}</span>
               <span className={r.points > leaderboard.botPoints ? "ok" : r.points === leaderboard.botPoints ? "dim" : "bad"}>
@@ -322,10 +349,15 @@ export default function Home() {
 
       {tab === "leaderboard" && (
         <div className="stack">
-          {leaderboard.leaderboard.length === 0 && <p className="dim">Chưa có điểm nào.</p>}
-          {leaderboard.leaderboard.map((r, i) => (
+          {displayLeaderboard.length === 0 && <p className="dim">Chưa có điểm nào.</p>}
+          {displayLeaderboard.map((r, i) => (
             <div className="card row-between" key={i}>
-              <span><span className="dim">#{i + 1}</span> {r.name}</span>
+              <span>
+                <span className="dim" style={{ marginRight: "8px", fontWeight: "bold" }}>
+                  {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                </span> 
+                {r.name}
+              </span>
               <span className="points">{r.points} điểm</span>
             </div>
           ))}
