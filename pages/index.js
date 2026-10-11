@@ -11,7 +11,6 @@ function isLocked(kickoffIso) {
   return Date.now() >= new Date(kickoffIso).getTime() - 8 * 3600 * 1000;
 }
 
-// Banner Siêu sao hàng đầu châu Âu
 const EUROPEAN_STARS = [
   { name: "Haaland", url: "https://crests.football-data.org/65.png", club: "Man City" },
   { name: "Saka", url: "https://crests.football-data.org/57.png", club: "Arsenal" },
@@ -19,15 +18,20 @@ const EUROPEAN_STARS = [
   { name: "Yamal", url: "https://crests.football-data.org/81.png", club: "Barcelona" },
   { name: "Kane", url: "https://crests.football-data.org/5.png", club: "Bayern Munich" },
   { name: "Palmer", url: "https://crests.football-data.org/61.png", club: "Chelsea" },
-  { name: "Vinícius", url: "https://crests.football-data.org/86.png", club: "Real Madrid" },
 ];
 
-// Kho huy hiệu chuẩn quốc tế cho mọi CLB EPL, La Liga, Champions League
+// Hàm tạo huy hiệu vector chữ cái tự động cho các CLB nhỏ/đội bóng mới
+function getDynamicBadge(teamName) {
+  const cleanName = teamName ? teamName.trim() : "EPL";
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=7c3aed&color=ffffff&bold=true&size=128&length=3`;
+}
+
+// Kho huy hiệu mở rộng toàn diện cho mọi CLB lớn nhỏ
 function getClubLogo(teamName) {
-  if (!teamName) return "https://crests.football-data.org/PL.png";
+  if (!teamName) return getDynamicBadge("EPL");
   const name = teamName.toLowerCase();
 
-  // --- Premier League ---
+  // --- Premier League & EFL (Bao gồm các CLB nhỏ / hạng dưới) ---
   if (name.includes("arsenal")) return "https://crests.football-data.org/57.png";
   if (name.includes("manchester city") || name.includes("man city")) return "https://crests.football-data.org/65.png";
   if (name.includes("manchester united") || name.includes("man utd")) return "https://crests.football-data.org/66.png";
@@ -49,13 +53,23 @@ function getClubLogo(teamName) {
   if (name.includes("southampton")) return "https://crests.football-data.org/340.png";
   if (name.includes("ipswich")) return "https://crests.football-data.org/349.png";
   if (name.includes("coventry")) return "https://crests.football-data.org/1070.png";
+  if (name.includes("burnley")) return "https://crests.football-data.org/328.png";
+  if (name.includes("luton")) return "https://crests.football-data.org/389.png";
+  if (name.includes("sheffield")) return "https://crests.football-data.org/356.png";
+  if (name.includes("leeds")) return "https://crests.football-data.org/341.png";
+  if (name.includes("watford")) return "https://crests.football-data.org/346.png";
+  if (name.includes("west brom")) return "https://crests.football-data.org/74.png";
+  if (name.includes("stoke")) return "https://crests.football-data.org/70.png";
+  if (name.includes("middlesbrough")) return "https://crests.football-data.org/355.png";
+  if (name.includes("sunderland")) return "https://crests.football-data.org/71.png";
+  if (name.includes("norwich")) return "https://crests.football-data.org/68.png";
 
   // --- La Liga ---
   if (name.includes("real madrid")) return "https://crests.football-data.org/86.png";
   if (name.includes("barcelona") || name.includes("barca")) return "https://crests.football-data.org/81.png";
-  if (name.includes("atletico madrid") || name.includes("atletico")) return "https://crests.football-data.org/78.png";
+  if (name.includes("atletico")) return "https://crests.football-data.org/78.png";
   if (name.includes("girona")) return "https://crests.football-data.org/298.png";
-  if (name.includes("athletic club") || name.includes("bilbao")) return "https://crests.football-data.org/77.png";
+  if (name.includes("bilbao")) return "https://crests.football-data.org/77.png";
   if (name.includes("real sociedad")) return "https://crests.football-data.org/92.png";
   if (name.includes("betis")) return "https://crests.football-data.org/90.png";
   if (name.includes("villarreal")) return "https://crests.football-data.org/94.png";
@@ -64,22 +78,20 @@ function getClubLogo(teamName) {
   if (name.includes("osasuna")) return "https://crests.football-data.org/79.png";
   if (name.includes("celta")) return "https://crests.football-data.org/558.png";
   if (name.includes("mallorca")) return "https://crests.football-data.org/89.png";
-  if (name.includes("rayo vallecano")) return "https://crests.football-data.org/87.png";
+  if (name.includes("rayo")) return "https://crests.football-data.org/87.png";
   if (name.includes("getafe")) return "https://crests.football-data.org/82.png";
-  if (name.includes("las palmas")) return "https://crests.football-data.org/275.png";
-  if (name.includes("alaves")) return "https://crests.football-data.org/263.png";
 
-  // --- UEFA Champions League / Châu Âu khác ---
+  // --- Champions League / Châu Âu ---
   if (name.includes("bayern")) return "https://crests.football-data.org/5.png";
   if (name.includes("dortmund")) return "https://crests.football-data.org/4.png";
   if (name.includes("leverkusen")) return "https://crests.football-data.org/3.png";
   if (name.includes("psg") || name.includes("paris")) return "https://crests.football-data.org/524.png";
   if (name.includes("inter")) return "https://crests.football-data.org/108.png";
-  if (name.includes("ac milan") || name.includes("milan")) return "https://crests.football-data.org/98.png";
+  if (name.includes("milan")) return "https://crests.football-data.org/98.png";
   if (name.includes("juventus")) return "https://crests.football-data.org/109.png";
 
-  // Dự phòng tự động tạo Avatar chữ cái nếu tên CLB lạ chưa có trong danh sách
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(teamName)}&background=2563eb&color=ffffff&bold=true`;
+  // Mặc định tự động sinh huy hiệu tên CLB nếu chưa có trong danh sách
+  return getDynamicBadge(teamName);
 }
 
 export default function Home() {
@@ -294,7 +306,7 @@ export default function Home() {
           border: 2px solid #c084fc;
           background: rgba(255, 255, 255, 0.08);
           object-fit: contain;
-          padding: 5px;
+          padding: 4px;
           box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
           animation: floatUpDown 3.5s ease-in-out infinite;
         }
@@ -321,7 +333,7 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Banner Siêu Sao Châu Âu */}
+        {/* Banner Siêu Sao */}
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
           {EUROPEAN_STARS.map((p, idx) => (
             <img 
@@ -374,6 +386,7 @@ export default function Home() {
               const editable = !locked && !finishedMatch;
               const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
 
+              // Lấy logo từ API hoặc tra cứu qua kho mở rộng (tự động fallback nếu là CLB nhỏ)
               const homeLogo = m.homeCrest || m.homeCrestUrl || getClubLogo(m.home);
               const awayLogo = m.awayCrest || m.awayCrestUrl || getClubLogo(m.away);
 
@@ -381,7 +394,12 @@ export default function Home() {
                 <div className="glass-card match-card" key={m.id}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <img src={homeLogo} alt={m.home} className="team-avatar-img" />
+                      <img 
+                        src={homeLogo} 
+                        onError={(e) => { e.target.src = getDynamicBadge(m.home); }} 
+                        alt={m.home} 
+                        className="team-avatar-img" 
+                      />
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.home}</span>
                     </div>
 
@@ -389,7 +407,12 @@ export default function Home() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.away}</span>
-                      <img src={awayLogo} alt={m.away} className="team-avatar-img" />
+                      <img 
+                        src={awayLogo} 
+                        onError={(e) => { e.target.src = getDynamicBadge(m.away); }} 
+                        alt={m.away} 
+                        className="team-avatar-img" 
+                      />
                     </div>
                   </div>
 
