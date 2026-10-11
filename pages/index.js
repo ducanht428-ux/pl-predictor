@@ -20,78 +20,44 @@ const EUROPEAN_STARS = [
   { name: "Palmer", url: "https://crests.football-data.org/61.png", club: "Chelsea" },
 ];
 
-// Hàm tạo huy hiệu vector chữ cái tự động cho các CLB nhỏ/đội bóng mới
-function getDynamicBadge(teamName) {
-  const cleanName = teamName ? teamName.trim() : "EPL";
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=7c3aed&color=ffffff&bold=true&size=128&length=3`;
-}
-
-// Kho huy hiệu mở rộng toàn diện cho mọi CLB lớn nhỏ
 function getClubLogo(teamName) {
-  if (!teamName) return getDynamicBadge("EPL");
+  if (!teamName) return "https://images.fotmob.com/image_resources/logo/team/8192.png";
   const name = teamName.toLowerCase();
 
-  // --- Premier League & EFL (Bao gồm các CLB nhỏ / hạng dưới) ---
-  if (name.includes("arsenal")) return "https://crests.football-data.org/57.png";
-  if (name.includes("manchester city") || name.includes("man city")) return "https://crests.football-data.org/65.png";
-  if (name.includes("manchester united") || name.includes("man utd")) return "https://crests.football-data.org/66.png";
-  if (name.includes("liverpool")) return "https://crests.football-data.org/64.png";
-  if (name.includes("chelsea")) return "https://crests.football-data.org/61.png";
-  if (name.includes("tottenham") || name.includes("spurs")) return "https://crests.football-data.org/73.png";
-  if (name.includes("newcastle")) return "https://crests.football-data.org/67.png";
-  if (name.includes("aston villa")) return "https://crests.football-data.org/58.png";
-  if (name.includes("brighton")) return "https://crests.football-data.org/397.png";
-  if (name.includes("west ham")) return "https://crests.football-data.org/563.png";
-  if (name.includes("crystal palace")) return "https://crests.football-data.org/354.png";
-  if (name.includes("fulham")) return "https://crests.football-data.org/63.png";
-  if (name.includes("brentford")) return "https://crests.football-data.org/402.png";
-  if (name.includes("everton")) return "https://crests.football-data.org/62.png";
-  if (name.includes("nottingham") || name.includes("forest")) return "https://crests.football-data.org/351.png";
-  if (name.includes("wolves") || name.includes("wolverhampton")) return "https://crests.football-data.org/76.png";
-  if (name.includes("bournemouth")) return "https://crests.football-data.org/1044.png";
-  if (name.includes("leicester")) return "https://crests.football-data.org/338.png";
-  if (name.includes("southampton")) return "https://crests.football-data.org/340.png";
-  if (name.includes("ipswich")) return "https://crests.football-data.org/349.png";
-  if (name.includes("coventry")) return "https://crests.football-data.org/1070.png";
-  if (name.includes("burnley")) return "https://crests.football-data.org/328.png";
-  if (name.includes("luton")) return "https://crests.football-data.org/389.png";
-  if (name.includes("sheffield")) return "https://crests.football-data.org/356.png";
-  if (name.includes("leeds")) return "https://crests.football-data.org/341.png";
-  if (name.includes("watford")) return "https://crests.football-data.org/346.png";
-  if (name.includes("west brom")) return "https://crests.football-data.org/74.png";
-  if (name.includes("stoke")) return "https://crests.football-data.org/70.png";
-  if (name.includes("middlesbrough")) return "https://crests.football-data.org/355.png";
-  if (name.includes("sunderland")) return "https://crests.football-data.org/71.png";
-  if (name.includes("norwich")) return "https://crests.football-data.org/68.png";
+  // --- Premier League & EFL ---
+  if (name.includes("hull")) return "https://images.fotmob.com/image_resources/logo/team/8346.png";
+  if (name.includes("arsenal")) return "https://images.fotmob.com/image_resources/logo/team/9825.png";
+  if (name.includes("manchester city") || name.includes("man city")) return "https://images.fotmob.com/image_resources/logo/team/8456.png";
+  if (name.includes("manchester united") || name.includes("man utd")) return "https://images.fotmob.com/image_resources/logo/team/10260.png";
+  if (name.includes("liverpool")) return "https://images.fotmob.com/image_resources/logo/team/8650.png";
+  if (name.includes("chelsea")) return "https://images.fotmob.com/image_resources/logo/team/8455.png";
+  if (name.includes("tottenham") || name.includes("spurs")) return "https://images.fotmob.com/image_resources/logo/team/8586.png";
+  if (name.includes("newcastle")) return "https://images.fotmob.com/image_resources/logo/team/10261.png";
+  if (name.includes("aston villa")) return "https://images.fotmob.com/image_resources/logo/team/10252.png";
+  if (name.includes("brighton")) return "https://images.fotmob.com/image_resources/logo/team/10204.png";
+  if (name.includes("west ham")) return "https://images.fotmob.com/image_resources/logo/team/8654.png";
+  if (name.includes("crystal palace")) return "https://images.fotmob.com/image_resources/logo/team/9826.png";
+  if (name.includes("fulham")) return "https://images.fotmob.com/image_resources/logo/team/9879.png";
+  if (name.includes("brentford")) return "https://images.fotmob.com/image_resources/logo/team/9937.png";
+  if (name.includes("everton")) return "https://images.fotmob.com/image_resources/logo/team/8668.png";
+  if (name.includes("nottingham") || name.includes("forest")) return "https://images.fotmob.com/image_resources/logo/team/10281.png";
+  if (name.includes("wolves") || name.includes("wolverhampton")) return "https://images.fotmob.com/image_resources/logo/team/8602.png";
+  if (name.includes("bournemouth")) return "https://images.fotmob.com/image_resources/logo/team/8678.png";
+  if (name.includes("leicester")) return "https://images.fotmob.com/image_resources/logo/team/8197.png";
+  if (name.includes("southampton")) return "https://images.fotmob.com/image_resources/logo/team/8466.png";
+  if (name.includes("ipswich")) return "https://images.fotmob.com/image_resources/logo/team/8492.png";
+  if (name.includes("coventry")) return "https://images.fotmob.com/image_resources/logo/team/8659.png";
+  if (name.includes("burnley")) return "https://images.fotmob.com/image_resources/logo/team/8194.png";
+  if (name.includes("leeds")) return "https://images.fotmob.com/image_resources/logo/team/8463.png";
+  if (name.includes("sunderland")) return "https://images.fotmob.com/image_resources/logo/team/8472.png";
 
   // --- La Liga ---
-  if (name.includes("real madrid")) return "https://crests.football-data.org/86.png";
-  if (name.includes("barcelona") || name.includes("barca")) return "https://crests.football-data.org/81.png";
-  if (name.includes("atletico")) return "https://crests.football-data.org/78.png";
-  if (name.includes("girona")) return "https://crests.football-data.org/298.png";
-  if (name.includes("bilbao")) return "https://crests.football-data.org/77.png";
-  if (name.includes("real sociedad")) return "https://crests.football-data.org/92.png";
-  if (name.includes("betis")) return "https://crests.football-data.org/90.png";
-  if (name.includes("villarreal")) return "https://crests.football-data.org/94.png";
-  if (name.includes("valencia")) return "https://crests.football-data.org/95.png";
-  if (name.includes("sevilla")) return "https://crests.football-data.org/559.png";
-  if (name.includes("osasuna")) return "https://crests.football-data.org/79.png";
-  if (name.includes("celta")) return "https://crests.football-data.org/558.png";
-  if (name.includes("mallorca")) return "https://crests.football-data.org/89.png";
-  if (name.includes("rayo")) return "https://crests.football-data.org/87.png";
-  if (name.includes("getafe")) return "https://crests.football-data.org/82.png";
+  if (name.includes("real madrid")) return "https://images.fotmob.com/image_resources/logo/team/8633.png";
+  if (name.includes("barcelona")) return "https://images.fotmob.com/image_resources/logo/team/8634.png";
+  if (name.includes("atletico")) return "https://images.fotmob.com/image_resources/logo/team/9906.png";
 
-  // --- Champions League / Châu Âu ---
-  if (name.includes("bayern")) return "https://crests.football-data.org/5.png";
-  if (name.includes("dortmund")) return "https://crests.football-data.org/4.png";
-  if (name.includes("leverkusen")) return "https://crests.football-data.org/3.png";
-  if (name.includes("psg") || name.includes("paris")) return "https://crests.football-data.org/524.png";
-  if (name.includes("inter")) return "https://crests.football-data.org/108.png";
-  if (name.includes("milan")) return "https://crests.football-data.org/98.png";
-  if (name.includes("juventus")) return "https://crests.football-data.org/109.png";
-
-  // Mặc định tự động sinh huy hiệu tên CLB nếu chưa có trong danh sách
-  return getDynamicBadge(teamName);
+  // Mặc định trả về logo bóng đá chuẩn, không bao giờ lỗi chữ cái
+  return "https://images.fotmob.com/image_resources/logo/team/8192.png";
 }
 
 export default function Home() {
@@ -320,7 +286,6 @@ export default function Home() {
       `}</style>
 
       <div className="wrap">
-        {/* Header */}
         <div className="header glass-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h1 className="title" style={{ margin: 0, background: "linear-gradient(90deg, #c084fc, #38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -333,7 +298,6 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Banner Siêu Sao */}
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
           {EUROPEAN_STARS.map((p, idx) => (
             <img 
@@ -347,7 +311,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Navigation Tabs */}
         <div className="tabs" style={{ marginBottom: "18px" }}>
           {[["matches", "Trận đấu"], ["bot", "Bot vs Bạn"], ["leaderboard", "Leaderboard"]].map(([k, label]) => (
             <button key={k} className={"tab-btn" + (tab === k ? " active" : "")} onClick={() => setTab(k)}>
@@ -373,7 +336,6 @@ export default function Home() {
         {notice && <div className="notice-box" style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", borderRadius: "12px", padding: "12px", color: "#fca5a5", marginBottom: "16px" }}>{notice}</div>}
         {loading && <p className="subtitle" style={{ textAlign: "center", color: "#c084fc" }}>⏳ Đang tải dữ liệu trận đấu...</p>}
 
-        {/* Tab Trận đấu */}
         {tab === "matches" && (
           <div className="stack">
             {matches.map((m) => {
@@ -386,7 +348,6 @@ export default function Home() {
               const editable = !locked && !finishedMatch;
               const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
 
-              // Lấy logo từ API hoặc tra cứu qua kho mở rộng (tự động fallback nếu là CLB nhỏ)
               const homeLogo = m.homeCrest || m.homeCrestUrl || getClubLogo(m.home);
               const awayLogo = m.awayCrest || m.awayCrestUrl || getClubLogo(m.away);
 
@@ -396,7 +357,7 @@ export default function Home() {
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <img 
                         src={homeLogo} 
-                        onError={(e) => { e.target.src = getDynamicBadge(m.home); }} 
+                        onError={(e) => { e.target.src = "https://images.fotmob.com/image_resources/logo/team/8192.png"; }} 
                         alt={m.home} 
                         className="team-avatar-img" 
                       />
@@ -409,7 +370,7 @@ export default function Home() {
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.away}</span>
                       <img 
                         src={awayLogo} 
-                        onError={(e) => { e.target.src = getDynamicBadge(m.away); }} 
+                        onError={(e) => { e.target.src = "https://images.fotmob.com/image_resources/logo/team/8192.png"; }} 
                         alt={m.away} 
                         className="team-avatar-img" 
                       />
@@ -498,11 +459,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab Bot vs Bạn */}
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
-              <img src="https://crests.football-data.org/65.png" alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
+              <img src="https://images.fotmob.com/image_resources/logo/team/8192.png" alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
               <div className="small" style={{ color: "#94a3b8" }}>🤖 Điểm số của Bot AI</div>
               <div className="bot-score" style={{ fontSize: "2.4rem", color: "#c084fc", fontWeight: "bold" }}>
                 {leaderboard.botPoints} điểm
@@ -519,7 +479,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab Leaderboard */}
         {tab === "leaderboard" && (
           <div className="stack">
             {displayLeaderboard.length === 0 && <p className="dim" style={{ textAlign: "center" }}>Chưa có điểm nào.</p>}
