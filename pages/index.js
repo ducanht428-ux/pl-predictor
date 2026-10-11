@@ -11,33 +11,34 @@ function isLocked(kickoffIso) {
   return Date.now() >= new Date(kickoffIso).getTime() - 8 * 3600 * 1000;
 }
 
-// Danh sách Siêu sao bóng đá kèm Avatar mã hóa màu sắc & Tên chuẩn CDN không bị chặn
-const STAR_PLAYERS = [
-  { name: "Haaland", team: "Man City", bg: "38bdf8", color: "ffffff" },
-  { name: "Salah", team: "Liverpool", bg: "ef4444", color: "ffffff" },
-  { name: "Saka", team: "Arsenal", bg: "dc2626", color: "ffffff" },
-  { name: "Palmer", team: "Chelsea", bg: "2563eb", color: "ffffff" },
-  { name: "Rashford", team: "Man Utd", bg: "b91c1c", color: "ffffff" },
-  { name: "Son", team: "Spurs", bg: "1e293b", color: "ffffff" },
-  { name: "KDB", team: "Man City", bg: "0284c7", color: "ffffff" },
+// Kho ảnh thật chính thức của các siêu sao (Nguồn ảnh chân dung cầu thủ thật)
+const REAL_PLAYERS = [
+  { name: "Haaland", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p223094.png" },
+  { name: "Salah", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p118748.png" },
+  { name: "Saka", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p223340.png" },
+  { name: "Palmer", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p444937.png" },
+  { name: "Rashford", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p176297.png" },
+  { name: "Son", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p85971.png" },
+  { name: "De Bruyne", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p61366.png" },
 ];
 
-function getAvatarUrl(name, bg = "9333ea", color = "ffffff") {
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=${color}&bold=true&length=2&size=128`;
-}
-
-function getTeamAvatar(teamName) {
-  if (!teamName) return getAvatarUrl("PL", "6d28d9");
-  const clean = teamName.replace(" FC", "").replace(" AFC", "");
-  let bg = "3b82f6";
-  if (clean.toLowerCase().includes("arsenal")) bg = "dc2626";
-  else if (clean.toLowerCase().includes("manchester united")) bg = "b91c1c";
-  else if (clean.toLowerCase().includes("manchester city")) bg = "38bdf8";
-  else if (clean.toLowerCase().includes("liverpool")) bg = "ef4444";
-  else if (clean.toLowerCase().includes("chelsea")) bg = "2563eb";
-  else if (clean.toLowerCase().includes("tottenham")) bg = "1e293b";
+// Hàm lấy logo hoặc ảnh đại diện CLB thật từ kho công khai Premier League
+function getClubLogo(teamName) {
+  if (!teamName) return "https://resources.premierleague.com/premierleague/badges/70/t21.png";
+  const name = teamName.toLowerCase();
   
-  return getAvatarUrl(clean, bg);
+  if (name.includes("arsenal")) return "https://resources.premierleague.com/premierleague/badges/70/t3.png";
+  if (name.includes("manchester city")) return "https://resources.premierleague.com/premierleague/badges/70/t43.png";
+  if (name.includes("manchester united")) return "https://resources.premierleague.com/premierleague/badges/70/t1.png";
+  if (name.includes("liverpool")) return "https://resources.premierleague.com/premierleague/badges/70/t14.png";
+  if (name.includes("chelsea")) return "https://resources.premierleague.com/premierleague/badges/70/t8.png";
+  if (name.includes("tottenham")) return "https://resources.premierleague.com/premierleague/badges/70/t6.png";
+  if (name.includes("newcastle")) return "https://resources.premierleague.com/premierleague/badges/70/t4.png";
+  if (name.includes("aston villa")) return "https://resources.premierleague.com/premierleague/badges/70/t7.png";
+  if (name.includes("coventry")) return "https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Coventry_City_F.C._logo.svg/150px-Coventry_City_F.C._logo.svg.png";
+  
+  // Mặc định trả về logo Ngoại hạng Anh nếu không khớp tên
+  return "https://resources.premierleague.com/premierleague/badges/70/t21.png";
 }
 
 export default function Home() {
@@ -206,7 +207,7 @@ export default function Home() {
     <div className="main-bg">
       <style jsx global>{`
         body {
-          background-color: #0d0a1a;
+          background-color: #0b0817;
           color: #f1f5f9;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           margin: 0;
@@ -216,9 +217,9 @@ export default function Home() {
         .main-bg {
           min-height: 100vh;
           background: 
-            radial-gradient(circle at 15% 20%, rgba(147, 51, 234, 0.25) 0%, transparent 40%),
-            radial-gradient(circle at 85% 70%, rgba(59, 130, 246, 0.2) 0%, transparent 45%),
-            #0b0817;
+            radial-gradient(circle at 20% 20%, rgba(147, 51, 234, 0.22) 0%, transparent 45%),
+            radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.18) 0%, transparent 45%),
+            #08060f;
           background-attachment: fixed;
           padding: 24px 12px;
           display: flex;
@@ -232,13 +233,13 @@ export default function Home() {
 
         @keyframes floatUpDown {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
+          50% { transform: translateY(-5px); }
         }
 
         .glass-card {
-          background: rgba(25, 20, 48, 0.75) !important;
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(168, 85, 247, 0.35) !important;
+          background: rgba(22, 18, 42, 0.78) !important;
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(168, 85, 247, 0.3) !important;
           border-radius: 20px !important;
           padding: 20px;
           margin-bottom: 16px;
@@ -246,13 +247,14 @@ export default function Home() {
         }
 
         .team-avatar-img {
-          width: 48px;
-          height: 48px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
-          border: 2px solid #a855f7;
-          background: #1e1b38;
-          object-fit: cover;
-          box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+          border: 2px solid #c084fc;
+          background: rgba(255, 255, 255, 0.05);
+          object-fit: contain;
+          padding: 4px;
+          box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
           animation: floatUpDown 3.5s ease-in-out infinite;
         }
 
@@ -278,16 +280,16 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Banner Siêu Sao (Avatar Động Vector Bảo Đảm Tải 100%) */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", margin: "16px 0", flexWrap: "wrap" }}>
-          {STAR_PLAYERS.map((p, idx) => (
+        {/* Banner Ảnh Thật Siêu Sao */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
+          {REAL_PLAYERS.map((p, idx) => (
             <img 
               key={idx} 
-              src={getAvatarUrl(p.name, p.bg, p.color)} 
+              src={p.url} 
               alt={p.name} 
-              title={`${p.name} (${p.team})`}
+              title={p.name}
               className="team-avatar-img" 
-              style={{ animationDelay: `${idx * 0.4}s` }}
+              style={{ objectFit: "cover", padding: "0px", animationDelay: `${idx * 0.3}s` }}
             />
           ))}
         </div>
@@ -331,22 +333,22 @@ export default function Home() {
               const editable = !locked && !finishedMatch;
               const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
 
-              const homeAvatar = getTeamAvatar(m.home);
-              const awayAvatar = getTeamAvatar(m.away);
+              const homeLogo = getClubLogo(m.home);
+              const awayLogo = getClubLogo(m.away);
 
               return (
                 <div className="glass-card match-card" key={m.id}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <img src={homeAvatar} alt={m.home} className="team-avatar-img" />
-                      <span style={{ fontWeight: "bold", fontSize: "1rem" }}>{m.home}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <img src={homeLogo} alt={m.home} className="team-avatar-img" />
+                      <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.home}</span>
                     </div>
 
                     <span style={{ fontWeight: "900", color: "#ec4899", fontSize: "1.1rem" }}>VS</span>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ fontWeight: "bold", fontSize: "1rem" }}>{m.away}</span>
-                      <img src={awayAvatar} alt={m.away} className="team-avatar-img" />
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.away}</span>
+                      <img src={awayLogo} alt={m.away} className="team-avatar-img" />
                     </div>
                   </div>
 
@@ -436,7 +438,7 @@ export default function Home() {
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
-              <img src={getAvatarUrl("BOT", "7c3aed")} alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
+              <img src={REAL_PLAYERS[0].url} alt="Bot AI" className="team-avatar-img" style={{ width: "75px", height: "75px", objectFit: "cover", margin: "0 auto 12px" }} />
               <div className="small" style={{ color: "#94a3b8" }}>🤖 Điểm số của Bot AI</div>
               <div className="bot-score" style={{ fontSize: "2.4rem", color: "#c084fc", fontWeight: "bold" }}>
                 {leaderboard.botPoints} điểm
