@@ -11,34 +11,36 @@ function isLocked(kickoffIso) {
   return Date.now() >= new Date(kickoffIso).getTime() - 8 * 3600 * 1000;
 }
 
-// Kho ảnh thật chính thức của các siêu sao (Nguồn ảnh chân dung cầu thủ thật)
-const REAL_PLAYERS = [
-  { name: "Haaland", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p223094.png" },
-  { name: "Salah", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p118748.png" },
-  { name: "Saka", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p223340.png" },
-  { name: "Palmer", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p444937.png" },
-  { name: "Rashford", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p176297.png" },
-  { name: "Son", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p85971.png" },
-  { name: "De Bruyne", url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p61366.png" },
+// Cập nhật danh sách các siêu sao đang hot nhất tại Premier League
+const CURRENT_STARS = [
+  { name: "Haaland", club: "Man City", bg: "0ea5e9" },
+  { name: "Saka", club: "Arsenal", bg: "ef4444" },
+  { name: "Palmer", club: "Chelsea", bg: "3b82f6" },
+  { name: "Foden", club: "Man City", bg: "0284c7" },
+  { name: "Ødegaard", club: "Arsenal", bg: "dc2626" },
+  { name: "Son", club: "Spurs", bg: "1e293b" },
+  { name: "Isak", club: "Newcastle", bg: "0f172a" },
 ];
 
-// Hàm lấy logo hoặc ảnh đại diện CLB thật từ kho công khai Premier League
+function getAvatarUrl(name, bg = "9333ea") {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=ffffff&bold=true&size=128`;
+}
+
+// Hàm lấy avatar/logo CLB chuẩn
 function getClubLogo(teamName) {
-  if (!teamName) return "https://resources.premierleague.com/premierleague/badges/70/t21.png";
+  if (!teamName) return getAvatarUrl("PL", "6d28d9");
   const name = teamName.toLowerCase();
   
-  if (name.includes("arsenal")) return "https://resources.premierleague.com/premierleague/badges/70/t3.png";
-  if (name.includes("manchester city")) return "https://resources.premierleague.com/premierleague/badges/70/t43.png";
-  if (name.includes("manchester united")) return "https://resources.premierleague.com/premierleague/badges/70/t1.png";
-  if (name.includes("liverpool")) return "https://resources.premierleague.com/premierleague/badges/70/t14.png";
-  if (name.includes("chelsea")) return "https://resources.premierleague.com/premierleague/badges/70/t8.png";
-  if (name.includes("tottenham")) return "https://resources.premierleague.com/premierleague/badges/70/t6.png";
-  if (name.includes("newcastle")) return "https://resources.premierleague.com/premierleague/badges/70/t4.png";
-  if (name.includes("aston villa")) return "https://resources.premierleague.com/premierleague/badges/70/t7.png";
-  if (name.includes("coventry")) return "https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Coventry_City_F.C._logo.svg/150px-Coventry_City_F.C._logo.svg.png";
+  if (name.includes("arsenal")) return getAvatarUrl("ARS", "dc2626");
+  if (name.includes("manchester city")) return getAvatarUrl("MCI", "0284c7");
+  if (name.includes("manchester united")) return getAvatarUrl("MUN", "b91c1c");
+  if (name.includes("liverpool")) return getAvatarUrl("LIV", "ef4444");
+  if (name.includes("chelsea")) return getAvatarUrl("CHE", "2563eb");
+  if (name.includes("tottenham")) return getAvatarUrl("TOT", "1e293b");
+  if (name.includes("newcastle")) return getAvatarUrl("NEW", "0f172a");
+  if (name.includes("aston villa")) return getAvatarUrl("AVL", "4f46e5");
   
-  // Mặc định trả về logo Ngoại hạng Anh nếu không khớp tên
-  return "https://resources.premierleague.com/premierleague/badges/70/t21.png";
+  return getAvatarUrl(teamName.substring(0, 3), "7c3aed");
 }
 
 export default function Home() {
@@ -251,9 +253,8 @@ export default function Home() {
           height: 50px;
           border-radius: 50%;
           border: 2px solid #c084fc;
-          background: rgba(255, 255, 255, 0.05);
-          object-fit: contain;
-          padding: 4px;
+          background: #1e1b38;
+          object-fit: cover;
           box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
           animation: floatUpDown 3.5s ease-in-out infinite;
         }
@@ -280,16 +281,16 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Banner Ảnh Thật Siêu Sao */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
-          {REAL_PLAYERS.map((p, idx) => (
+        {/* Banner Siêu sao Premier League Hiện Tại */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", margin: "16px 0", flexWrap: "wrap" }}>
+          {CURRENT_STARS.map((p, idx) => (
             <img 
               key={idx} 
-              src={p.url} 
+              src={getAvatarUrl(p.name, p.bg)} 
               alt={p.name} 
-              title={p.name}
+              title={`${p.name} (${p.club})`}
               className="team-avatar-img" 
-              style={{ objectFit: "cover", padding: "0px", animationDelay: `${idx * 0.3}s` }}
+              style={{ animationDelay: `${idx * 0.3}s` }}
             />
           ))}
         </div>
@@ -438,7 +439,7 @@ export default function Home() {
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
-              <img src={REAL_PLAYERS[0].url} alt="Bot AI" className="team-avatar-img" style={{ width: "75px", height: "75px", objectFit: "cover", margin: "0 auto 12px" }} />
+              <img src={getAvatarUrl("BOT", "7c3aed")} alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
               <div className="small" style={{ color: "#94a3b8" }}>🤖 Điểm số của Bot AI</div>
               <div className="bot-score" style={{ fontSize: "2.4rem", color: "#c084fc", fontWeight: "bold" }}>
                 {leaderboard.botPoints} điểm
