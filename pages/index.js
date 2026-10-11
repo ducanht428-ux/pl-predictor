@@ -11,36 +11,33 @@ function isLocked(kickoffIso) {
   return Date.now() >= new Date(kickoffIso).getTime() - 8 * 3600 * 1000;
 }
 
-// Danh sách Link ảnh Wikipedia / Wikimedia Commons ổn định 100% không lo bị chặn
-const STABLE_AVATARS = [
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Erling_Haaland_2023.jpg/440px-Erling_Haaland_2023.jpg", // Haaland
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Mohamed_Salah_2018.jpg/440px-Mohamed_Salah_2018.jpg", // Salah
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Bukayo_Saka_2023.jpg/440px-Bukayo_Saka_2023.jpg", // Saka
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Marcus_Rashford_2018.jpg/440px-Marcus_Rashford_2018.jpg", // Rashford
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Cole_Palmer_2023.jpg/440px-Cole_Palmer_2023.jpg", // Palmer
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Kevin_De_Bruyne_2018.jpg/440px-Kevin_De_Bruyne_2018.jpg", // De Bruyne
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Son_Heung-min_2018.jpg/440px-Son_Heung-min_2018.jpg", // Son
+// Danh sách Siêu sao bóng đá kèm Avatar mã hóa màu sắc & Tên chuẩn CDN không bị chặn
+const STAR_PLAYERS = [
+  { name: "Haaland", team: "Man City", bg: "38bdf8", color: "ffffff" },
+  { name: "Salah", team: "Liverpool", bg: "ef4444", color: "ffffff" },
+  { name: "Saka", team: "Arsenal", bg: "dc2626", color: "ffffff" },
+  { name: "Palmer", team: "Chelsea", bg: "2563eb", color: "ffffff" },
+  { name: "Rashford", team: "Man Utd", bg: "b91c1c", color: "ffffff" },
+  { name: "Son", team: "Spurs", bg: "1e293b", color: "ffffff" },
+  { name: "KDB", team: "Man City", bg: "0284c7", color: "ffffff" },
 ];
 
-// Kho ảnh cầu thủ/logo CLB tương ứng với các đội bóng
-const TEAM_ASSETS = {
-  "Arsenal": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Bukayo_Saka_2023.jpg/440px-Bukayo_Saka_2023.jpg",
-  "Manchester City": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Erling_Haaland_2023.jpg/440px-Erling_Haaland_2023.jpg",
-  "Liverpool": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Mohamed_Salah_2018.jpg/440px-Mohamed_Salah_2018.jpg",
-  "Manchester United": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Marcus_Rashford_2018.jpg/440px-Marcus_Rashford_2018.jpg",
-  "Chelsea": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Cole_Palmer_2023.jpg/440px-Cole_Palmer_2023.jpg",
-  "Tottenham Hotspur": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Son_Heung-min_2018.jpg/440px-Son_Heung-min_2018.jpg",
-  "DEFAULT": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Kevin_De_Bruyne_2018.jpg/440px-Kevin_De_Bruyne_2018.jpg",
-};
-
-const FALLBACK_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Football_Pencil_Icon.svg/240px-Football_Pencil_Icon.svg.png";
+function getAvatarUrl(name, bg = "9333ea", color = "ffffff") {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=${color}&bold=true&length=2&size=128`;
+}
 
 function getTeamAvatar(teamName) {
-  if (!teamName) return TEAM_ASSETS["DEFAULT"];
-  for (const [key, url] of Object.entries(TEAM_ASSETS)) {
-    if (teamName.toLowerCase().includes(key.toLowerCase())) return url;
-  }
-  return TEAM_ASSETS["DEFAULT"];
+  if (!teamName) return getAvatarUrl("PL", "6d28d9");
+  const clean = teamName.replace(" FC", "").replace(" AFC", "");
+  let bg = "3b82f6";
+  if (clean.toLowerCase().includes("arsenal")) bg = "dc2626";
+  else if (clean.toLowerCase().includes("manchester united")) bg = "b91c1c";
+  else if (clean.toLowerCase().includes("manchester city")) bg = "38bdf8";
+  else if (clean.toLowerCase().includes("liverpool")) bg = "ef4444";
+  else if (clean.toLowerCase().includes("chelsea")) bg = "2563eb";
+  else if (clean.toLowerCase().includes("tottenham")) bg = "1e293b";
+  
+  return getAvatarUrl(clean, bg);
 }
 
 export default function Home() {
@@ -209,7 +206,7 @@ export default function Home() {
     <div className="main-bg">
       <style jsx global>{`
         body {
-          background-color: #0b0817;
+          background-color: #0d0a1a;
           color: #f1f5f9;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           margin: 0;
@@ -239,9 +236,9 @@ export default function Home() {
         }
 
         .glass-card {
-          background: rgba(25, 20, 48, 0.7) !important;
+          background: rgba(25, 20, 48, 0.75) !important;
           backdrop-filter: blur(12px);
-          border: 1px solid rgba(168, 85, 247, 0.3) !important;
+          border: 1px solid rgba(168, 85, 247, 0.35) !important;
           border-radius: 20px !important;
           padding: 20px;
           margin-bottom: 16px;
@@ -249,8 +246,8 @@ export default function Home() {
         }
 
         .team-avatar-img {
-          width: 52px;
-          height: 52px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           border: 2px solid #a855f7;
           background: #1e1b38;
@@ -281,14 +278,14 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Banner Cầu Thủ Siêu Sao (Nguồn Wikipedia không lo lỗi link) */}
+        {/* Banner Siêu Sao (Avatar Động Vector Bảo Đảm Tải 100%) */}
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", margin: "16px 0", flexWrap: "wrap" }}>
-          {STABLE_AVATARS.map((url, idx) => (
+          {STAR_PLAYERS.map((p, idx) => (
             <img 
               key={idx} 
-              src={url} 
-              onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
-              alt="Player" 
+              src={getAvatarUrl(p.name, p.bg, p.color)} 
+              alt={p.name} 
+              title={`${p.name} (${p.team})`}
               className="team-avatar-img" 
               style={{ animationDelay: `${idx * 0.4}s` }}
             />
@@ -321,7 +318,7 @@ export default function Home() {
         {notice && <div className="notice-box" style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", borderRadius: "12px", padding: "12px", color: "#fca5a5", marginBottom: "16px" }}>{notice}</div>}
         {loading && <p className="subtitle" style={{ textAlign: "center", color: "#c084fc" }}>⏳ Đang tải dữ liệu trận đấu...</p>}
 
-        {/* Tab Danh sách Trận đấu */}
+        {/* Tab Trận đấu */}
         {tab === "matches" && (
           <div className="stack">
             {matches.map((m) => {
@@ -341,7 +338,7 @@ export default function Home() {
                 <div className="glass-card match-card" key={m.id}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <img src={homeAvatar} onError={(e) => { e.target.src = FALLBACK_IMAGE; }} alt={m.home} className="team-avatar-img" />
+                      <img src={homeAvatar} alt={m.home} className="team-avatar-img" />
                       <span style={{ fontWeight: "bold", fontSize: "1rem" }}>{m.home}</span>
                     </div>
 
@@ -349,7 +346,7 @@ export default function Home() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <span style={{ fontWeight: "bold", fontSize: "1rem" }}>{m.away}</span>
-                      <img src={awayAvatar} onError={(e) => { e.target.src = FALLBACK_IMAGE; }} alt={m.away} className="team-avatar-img" />
+                      <img src={awayAvatar} alt={m.away} className="team-avatar-img" />
                     </div>
                   </div>
 
@@ -439,7 +436,7 @@ export default function Home() {
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
-              <img src={STABLE_AVATARS[5]} onError={(e) => { e.target.src = FALLBACK_IMAGE; }} alt="Bot AI" className="team-avatar-img" style={{ width: "80px", height: "80px", margin: "0 auto 12px" }} />
+              <img src={getAvatarUrl("BOT", "7c3aed")} alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
               <div className="small" style={{ color: "#94a3b8" }}>🤖 Điểm số của Bot AI</div>
               <div className="bot-score" style={{ fontSize: "2.4rem", color: "#c084fc", fontWeight: "bold" }}>
                 {leaderboard.botPoints} điểm
@@ -456,7 +453,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab Bảng Xếp Hạng */}
+        {/* Tab Leaderboard */}
         {tab === "leaderboard" && (
           <div className="stack">
             {displayLeaderboard.length === 0 && <p className="dim" style={{ textAlign: "center" }}>Chưa có điểm nào.</p>}
