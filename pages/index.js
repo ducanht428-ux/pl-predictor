@@ -11,36 +11,33 @@ function isLocked(kickoffIso) {
   return Date.now() >= new Date(kickoffIso).getTime() - 8 * 3600 * 1000;
 }
 
-// Cập nhật danh sách các siêu sao đang hot nhất tại Premier League
-const CURRENT_STARS = [
-  { name: "Haaland", club: "Man City", bg: "0ea5e9" },
-  { name: "Saka", club: "Arsenal", bg: "ef4444" },
-  { name: "Palmer", club: "Chelsea", bg: "3b82f6" },
-  { name: "Foden", club: "Man City", bg: "0284c7" },
-  { name: "Ødegaard", club: "Arsenal", bg: "dc2626" },
-  { name: "Son", club: "Spurs", bg: "1e293b" },
-  { name: "Isak", club: "Newcastle", bg: "0f172a" },
+// Danh sách Siêu sao EPL sử dụng CDN ảnh chất lượng cao không bị chặn CORS
+const STAR_PLAYERS = [
+  { name: "Haaland", url: "https://crests.football-data.org/65.png", club: "Man City" },
+  { name: "Saka", url: "https://crests.football-data.org/57.png", club: "Arsenal" },
+  { name: "Palmer", url: "https://crests.football-data.org/61.png", club: "Chelsea" },
+  { name: "Foden", url: "https://crests.football-data.org/65.png", club: "Man City" },
+  { name: "Ødegaard", url: "https://crests.football-data.org/57.png", club: "Arsenal" },
+  { name: "Son", url: "https://crests.football-data.org/73.png", club: "Tottenham" },
+  { name: "Isak", url: "https://crests.football-data.org/67.png", club: "Newcastle" },
 ];
 
-function getAvatarUrl(name, bg = "9333ea") {
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=ffffff&bold=true&size=128`;
-}
-
-// Hàm lấy avatar/logo CLB chuẩn
-function getClubLogo(teamName) {
-  if (!teamName) return getAvatarUrl("PL", "6d28d9");
+// Hàm lấy Logo CLB mặc định chuẩn từ CDN Football-Data nếu API không có crest
+function getFallbackLogo(teamName) {
+  if (!teamName) return "https://crests.football-data.org/PL.png";
   const name = teamName.toLowerCase();
-  
-  if (name.includes("arsenal")) return getAvatarUrl("ARS", "dc2626");
-  if (name.includes("manchester city")) return getAvatarUrl("MCI", "0284c7");
-  if (name.includes("manchester united")) return getAvatarUrl("MUN", "b91c1c");
-  if (name.includes("liverpool")) return getAvatarUrl("LIV", "ef4444");
-  if (name.includes("chelsea")) return getAvatarUrl("CHE", "2563eb");
-  if (name.includes("tottenham")) return getAvatarUrl("TOT", "1e293b");
-  if (name.includes("newcastle")) return getAvatarUrl("NEW", "0f172a");
-  if (name.includes("aston villa")) return getAvatarUrl("AVL", "4f46e5");
-  
-  return getAvatarUrl(teamName.substring(0, 3), "7c3aed");
+
+  if (name.includes("arsenal")) return "https://crests.football-data.org/57.png";
+  if (name.includes("manchester city")) return "https://crests.football-data.org/65.png";
+  if (name.includes("manchester united")) return "https://crests.football-data.org/66.png";
+  if (name.includes("liverpool")) return "https://crests.football-data.org/64.png";
+  if (name.includes("chelsea")) return "https://crests.football-data.org/61.png";
+  if (name.includes("tottenham")) return "https://crests.football-data.org/73.png";
+  if (name.includes("newcastle")) return "https://crests.football-data.org/67.png";
+  if (name.includes("aston villa")) return "https://crests.football-data.org/58.png";
+  if (name.includes("coventry")) return "https://crests.football-data.org/1070.png";
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(teamName)}&background=2563eb&color=ffffff&bold=true`;
 }
 
 export default function Home() {
@@ -253,8 +250,9 @@ export default function Home() {
           height: 50px;
           border-radius: 50%;
           border: 2px solid #c084fc;
-          background: #1e1b38;
-          object-fit: cover;
+          background: rgba(255, 255, 255, 0.08);
+          object-fit: contain;
+          padding: 5px;
           box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
           animation: floatUpDown 3.5s ease-in-out infinite;
         }
@@ -281,12 +279,13 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Banner Siêu sao Premier League Hiện Tại */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", margin: "16px 0", flexWrap: "wrap" }}>
-          {CURRENT_STARS.map((p, idx) => (
+        {/* Banner Logo/Icon Siêu sao Premier League (CDN chính thức không bị lỗi) */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
+          {STAR_PLAYERS.map((p, idx) => (
             <img 
               key={idx} 
-              src={getAvatarUrl(p.name, p.bg)} 
+              src={p.url} 
+              onError={(e) => { e.target.src = getFallbackLogo(p.name); }}
               alt={p.name} 
               title={`${p.name} (${p.club})`}
               className="team-avatar-img" 
@@ -334,14 +333,20 @@ export default function Home() {
               const editable = !locked && !finishedMatch;
               const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
 
-              const homeLogo = getClubLogo(m.home);
-              const awayLogo = getClubLogo(m.away);
+              // Lấy logo từ API trả về hoặc dùng link dự phòng Football-Data CDN
+              const homeLogo = m.homeCrest || m.homeCrestUrl || getFallbackLogo(m.home);
+              const awayLogo = m.awayCrest || m.awayCrestUrl || getFallbackLogo(m.away);
 
               return (
                 <div className="glass-card match-card" key={m.id}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <img src={homeLogo} alt={m.home} className="team-avatar-img" />
+                      <img 
+                        src={homeLogo} 
+                        onError={(e) => { e.target.src = getFallbackLogo(m.home); }} 
+                        alt={m.home} 
+                        className="team-avatar-img" 
+                      />
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.home}</span>
                     </div>
 
@@ -349,7 +354,12 @@ export default function Home() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.away}</span>
-                      <img src={awayLogo} alt={m.away} className="team-avatar-img" />
+                      <img 
+                        src={awayLogo} 
+                        onError={(e) => { e.target.src = getFallbackLogo(m.away); }} 
+                        alt={m.away} 
+                        className="team-avatar-img" 
+                      />
                     </div>
                   </div>
 
@@ -439,7 +449,7 @@ export default function Home() {
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
-              <img src={getAvatarUrl("BOT", "7c3aed")} alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
+              <img src="https://crests.football-data.org/65.png" alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
               <div className="small" style={{ color: "#94a3b8" }}>🤖 Điểm số của Bot AI</div>
               <div className="bot-score" style={{ fontSize: "2.4rem", color: "#c084fc", fontWeight: "bold" }}>
                 {leaderboard.botPoints} điểm
