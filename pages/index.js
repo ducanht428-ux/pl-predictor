@@ -239,7 +239,7 @@ export default function Home() {
           height: 48px;
           border-radius: 50%;
           border: 2px solid #c084fc;
-          background: #ffffff;
+          background: #1e1b4b;
           object-fit: cover;
           object-position: center;
           padding: 2px;
@@ -320,7 +320,6 @@ export default function Home() {
       `}</style>
 
       <div className="wrap">
-        {/* Tiêu đề & Thông tin tài khoản */}
         <div className="header glass-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h1 className="title" style={{ margin: 0, background: "linear-gradient(90deg, #c084fc, #38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -333,7 +332,6 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
-        {/* Thanh sao châu Âu trang trí */}
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
           {EUROPEAN_STARS.map((p, idx) => (
             <img 
@@ -347,7 +345,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Menu Tab chính */}
         <div className="tabs" style={{ marginBottom: "18px" }}>
           {[["matches", "Trận đấu"], ["bot", "Bot vs Bạn"], ["leaderboard", "Leaderboard"]].map(([k, label]) => (
             <button key={k} className={"tab-btn" + (tab === k ? " active" : "")} onClick={() => setTab(k)}>
@@ -356,7 +353,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Menu chọn Giải đấu */}
         {tab === "matches" && (
           <div className="tabs" style={{ marginBottom: "18px" }}>
             {Object.entries(COMPETITIONS).map(([code, label]) => (
@@ -374,7 +370,6 @@ export default function Home() {
         {notice && <div className="notice-box" style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", borderRadius: "12px", padding: "12px", color: "#fca5a5", marginBottom: "16px" }}>{notice}</div>}
         {loading && <p className="subtitle" style={{ textAlign: "center", color: "#c084fc" }}>⏳ Đang tải dữ liệu trận đấu...</p>}
 
-        {/* Danh sách trận đấu */}
         {tab === "matches" && (
           <div className="stack">
             {matches.map((m) => {
@@ -394,7 +389,15 @@ export default function Home() {
                 <div className="glass-card match-card" key={m.id}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <img src={homeLogo} alt={m.home} className="team-avatar-img" />
+                      <img 
+                        src={homeLogo} 
+                        alt={m.home} 
+                        className="team-avatar-img"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.home)}&background=1e1b4b&color=38bdf8&bold=true&size=128&rounded=true`;
+                        }}
+                      />
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.home}</span>
                     </div>
 
@@ -402,7 +405,15 @@ export default function Home() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.away}</span>
-                      <img src={awayLogo} alt={m.away} className="team-avatar-img" />
+                      <img 
+                        src={awayLogo} 
+                        alt={m.away} 
+                        className="team-avatar-img"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.away)}&background=1e1b4b&color=38bdf8&bold=true&size=128&rounded=true`;
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -488,7 +499,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab Bot vs Bạn */}
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
@@ -509,7 +519,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab Bảng xếp hạng */}
         {tab === "leaderboard" && (
           <div className="stack">
             {displayLeaderboard.length === 0 && <p className="dim" style={{ textAlign: "center" }}>Chưa có điểm nào.</p>}
