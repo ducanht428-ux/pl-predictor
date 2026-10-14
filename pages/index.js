@@ -253,9 +253,74 @@ export default function Home() {
           color: white !important;
           font-weight: 600;
         }
+
+        .tabs {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          background: rgba(22, 18, 42, 0.6);
+          padding: 6px;
+          border-radius: 14px;
+          border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .tab-btn {
+          background: transparent;
+          border: none;
+          color: #94a3b8;
+          padding: 8px 16px;
+          font-weight: 600;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+          background: linear-gradient(135deg, #9333ea, #6366f1);
+          color: white;
+          box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+        }
+
+        .score-input {
+          width: 50px;
+          height: 40px;
+          background: rgba(15, 12, 28, 0.8);
+          border: 1px solid rgba(168, 85, 247, 0.4);
+          border-radius: 10px;
+          color: white;
+          text-align: center;
+          font-size: 1.1rem;
+          font-weight: bold;
+        }
+
+        .pick-btn {
+          padding: 10px 18px;
+          border-radius: 10px;
+          cursor: pointer;
+        }
+
+        .motm-input {
+          flex: 1;
+          height: 40px;
+          background: rgba(15, 12, 28, 0.8);
+          border: 1px solid rgba(168, 85, 247, 0.4);
+          border-radius: 10px;
+          color: white;
+          padding: 0 12px;
+        }
+
+        .motm-row {
+          display: flex;
+          gap: 8px;
+        }
+
+        .ok { color: #4ade80; }
+        .bad { color: #f87171; }
+        .dim { color: #94a3b8; font-size: 0.9rem; }
       `}</style>
 
       <div className="wrap">
+        {/* Tiêu đề & Thông tin tài khoản */}
         <div className="header glass-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h1 className="title" style={{ margin: 0, background: "linear-gradient(90deg, #c084fc, #38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -268,6 +333,7 @@ export default function Home() {
           <button className="pick-btn shimmer-btn" onClick={logout}>Đăng xuất</button>
         </div>
 
+        {/* Thanh sao châu Âu trang trí */}
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", margin: "16px 0", flexWrap: "wrap" }}>
           {EUROPEAN_STARS.map((p, idx) => (
             <img 
@@ -281,6 +347,7 @@ export default function Home() {
           ))}
         </div>
 
+        {/* Menu Tab chính */}
         <div className="tabs" style={{ marginBottom: "18px" }}>
           {[["matches", "Trận đấu"], ["bot", "Bot vs Bạn"], ["leaderboard", "Leaderboard"]].map(([k, label]) => (
             <button key={k} className={"tab-btn" + (tab === k ? " active" : "")} onClick={() => setTab(k)}>
@@ -289,6 +356,7 @@ export default function Home() {
           ))}
         </div>
 
+        {/* Menu chọn Giải đấu */}
         {tab === "matches" && (
           <div className="tabs" style={{ marginBottom: "18px" }}>
             {Object.entries(COMPETITIONS).map(([code, label]) => (
@@ -306,6 +374,7 @@ export default function Home() {
         {notice && <div className="notice-box" style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", borderRadius: "12px", padding: "12px", color: "#fca5a5", marginBottom: "16px" }}>{notice}</div>}
         {loading && <p className="subtitle" style={{ textAlign: "center", color: "#c084fc" }}>⏳ Đang tải dữ liệu trận đấu...</p>}
 
+        {/* Danh sách trận đấu */}
         {tab === "matches" && (
           <div className="stack">
             {matches.map((m) => {
@@ -419,6 +488,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* Tab Bot vs Bạn */}
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
@@ -439,6 +509,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* Tab Bảng xếp hạng */}
         {tab === "leaderboard" && (
           <div className="stack">
             {displayLeaderboard.length === 0 && <p className="dim" style={{ textAlign: "center" }}>Chưa có điểm nào.</p>}
