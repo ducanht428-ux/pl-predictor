@@ -20,39 +20,13 @@ const EUROPEAN_STARS = [
   { name: "Palmer", url: "https://crests.football-data.org/61.png", club: "Chelsea" },
 ];
 
-// Hàm tra cứu và sinh logo tự động cho FULL TẤT CẢ CÁC CLB TRÊN THẾ GIỚI
 function getClubLogo(teamName) {
-  if (!teamName) return "https://ui-avatars.com/api/?name=FC&background=7c3aed&color=ffffff&bold=true";
-  const name = teamName.toLowerCase();
-
-  // --- Các CLB lớn phổ biến (Bảo đảm chuẩn xác tuyệt đối) ---
-  if (name.includes("arsenal")) return "https://crests.football-data.org/57.png";
-  if (name.includes("manchester city") || name.includes("man city")) return "https://crests.football-data.org/65.png";
-  if (name.includes("manchester united") || name.includes("man utd")) return "https://crests.football-data.org/66.png";
-  if (name.includes("liverpool")) return "https://crests.football-data.org/64.png";
-  if (name.includes("chelsea")) return "https://crests.football-data.org/61.png";
-  if (name.includes("tottenham") || name.includes("spurs")) return "https://crests.football-data.org/73.png";
-  if (name.includes("newcastle")) return "https://crests.football-data.org/67.png";
-  if (name.includes("aston villa")) return "https://crests.football-data.org/58.png";
-  if (name.includes("real madrid")) return "https://crests.football-data.org/86.png";
-  if (name.includes("barcelona") || name.includes("barca")) return "https://crests.football-data.org/81.png";
-  if (name.includes("atletico")) return "https://crests.football-data.org/78.png";
-  if (name.includes("bayern")) return "https://crests.football-data.org/5.png";
-  if (name.includes("dortmund")) return "https://crests.football-data.org/4.png";
-  if (name.includes("psg") || name.includes("paris")) return "https://crests.football-data.org/524.png";
-  if (name.includes("inter")) return "https://crests.football-data.org/108.png";
-  if (name.includes("ac milan") || name.includes("milan")) return "https://crests.football-data.org/98.png";
-  if (name.includes("juventus")) return "https://crests.football-data.org/109.png";
-
-  // --- THUẬT TOÁN TỰ ĐỘNG FULL CLB CÒN LẠI ---
-  // Lọc lấy từ khóa ngắn gọn của tên đội (VD: "Real Racing Club de Santander" lấy chữ "Santander" hoặc "Racing")
+  if (!teamName) return "https://ui-avatars.com/api/?name=FC&background=1e1b4b&color=c084fc&bold=true";
   let cleanName = teamName
-    .replace(/FC|AFC|CF|SAD|S\.A\.D\.|United|City|Real|Athletic|Club|De|Del/gi, "")
+    .replace(/FC|AFC|CF|SAD|S\.A\.D\.|United|City|Town|Real|Athletic|Club|De|Del/gi, "")
     .trim();
   if (!cleanName) cleanName = teamName;
-
-  // Trả về huy hiệu tự động thiết kế cực kỳ chuyên nghiệp và sang trọng cho mọi đội bóng
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=1e1b4b&color=c084fc&bold=true&size=128&rounded=true`;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=1e1b4b&color=38bdf8&bold=true&size=128&rounded=true`;
 }
 
 export default function Home() {
@@ -344,19 +318,14 @@ export default function Home() {
               const editable = !locked && !finishedMatch;
               const draft = scoreInputs[m.id] ?? { home: mine?.home ?? "", away: mine?.away ?? "" };
 
-              const homeLogo = m.homeCrest || m.homeCrestUrl || getClubLogo(m.home);
-              const awayLogo = m.awayCrest || m.awayCrestUrl || getClubLogo(m.away);
+              const homeLogo = getClubLogo(m.home);
+              const awayLogo = getClubLogo(m.away);
 
               return (
                 <div className="glass-card match-card" key={m.id}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <img 
-                        src={homeLogo} 
-                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.home)}&background=1e1b4b&color=c084fc&bold=true`; }}
-                        alt={m.home} 
-                        className="team-avatar-img" 
-                      />
+                      <img src={homeLogo} alt={m.home} className="team-avatar-img" />
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.home}</span>
                     </div>
 
@@ -364,12 +333,7 @@ export default function Home() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <span style={{ fontWeight: "bold", fontSize: "1.05rem" }}>{m.away}</span>
-                      <img 
-                        src={awayLogo} 
-                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.away)}&background=1e1b4b&color=c084fc&bold=true`; }}
-                        alt={m.away} 
-                        className="team-avatar-img" 
-                      />
+                      <img src={awayLogo} alt={m.away} className="team-avatar-img" />
                     </div>
                   </div>
 
@@ -458,7 +422,7 @@ export default function Home() {
         {tab === "bot" && (
           <div className="stack">
             <div className="glass-card" style={{ textAlign: "center", padding: "28px" }}>
-              <img src="https://crests.football-data.org/86.png" alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
+              <img src="https://ui-avatars.com/api/?name=AI&background=1e1b4b&color=38bdf8&bold=true&size=128&rounded=true" alt="Bot AI" className="team-avatar-img" style={{ width: "70px", height: "70px", margin: "0 auto 12px" }} />
               <div className="small" style={{ color: "#94a3b8" }}>🤖 Điểm số của Bot AI</div>
               <div className="bot-score" style={{ fontSize: "2.4rem", color: "#c084fc", fontWeight: "bold" }}>
                 {leaderboard.botPoints} điểm
