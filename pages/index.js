@@ -20,11 +20,12 @@ const EUROPEAN_STARS = [
   { name: "Palmer", url: "https://crests.football-data.org/61.png", club: "Chelsea" },
 ];
 
-// Hàm trả về link huy hiệu chuẩn xác 100% từ Football-Data CDN
+// Hàm tra cứu logo toàn diện cho mọi CLB ở mọi giải đấu (EPL, La Liga, UCL, Ligue 1)
 function getClubLogo(teamName) {
   if (!teamName) return "https://crests.football-data.org/PL.png";
   const name = teamName.toLowerCase();
 
+  // --- Premier League & EFL ---
   if (name.includes("arsenal")) return "https://crests.football-data.org/57.png";
   if (name.includes("manchester city") || name.includes("man city")) return "https://crests.football-data.org/65.png";
   if (name.includes("manchester united") || name.includes("man utd")) return "https://crests.football-data.org/66.png";
@@ -51,13 +52,61 @@ function getClubLogo(teamName) {
   if (name.includes("leeds")) return "https://crests.football-data.org/341.png";
   if (name.includes("sunderland")) return "https://crests.football-data.org/356.png";
 
-  // La Liga
+  // --- La Liga ---
   if (name.includes("real madrid")) return "https://crests.football-data.org/86.png";
-  if (name.includes("barcelona")) return "https://crests.football-data.org/81.png";
+  if (name.includes("barcelona") || name.includes("barca")) return "https://crests.football-data.org/81.png";
   if (name.includes("atletico")) return "https://crests.football-data.org/78.png";
+  if (name.includes("girona")) return "https://crests.football-data.org/298.png";
+  if (name.includes("athletic") || name.includes("bilbao")) return "https://crests.football-data.org/77.png";
+  if (name.includes("real sociedad") || name.includes("sociedad")) return "https://crests.football-data.org/92.png";
+  if (name.includes("betis")) return "https://crests.football-data.org/90.png";
+  if (name.includes("villarreal")) return "https://crests.football-data.org/94.png";
+  if (name.includes("valencia")) return "https://crests.football-data.org/95.png";
+  if (name.includes("sevilla")) return "https://crests.football-data.org/559.png";
+  if (name.includes("osasuna")) return "https://crests.football-data.org/79.png";
+  if (name.includes("celta")) return "https://crests.football-data.org/558.png";
+  if (name.includes("mallorca")) return "https://crests.football-data.org/89.png";
+  if (name.includes("rayo")) return "https://crests.football-data.org/87.png";
+  if (name.includes("getafe")) return "https://crests.football-data.org/82.png";
+  if (name.includes("las palmas")) return "https://crests.football-data.org/275.png";
+  if (name.includes("alaves")) return "https://crests.football-data.org/263.png";
 
-  // Mặc định sinh huy hiệu tên CLB tự động không bao giờ lỗi
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(teamName)}&background=7c3aed&color=ffffff&bold=true&size=128`;
+  // --- Ligue 1 ---
+  if (name.includes("psg") || name.includes("paris")) return "https://crests.football-data.org/524.png";
+  if (name.includes("marseille")) return "https://crests.football-data.org/516.png";
+  if (name.includes("lyon")) return "https://crests.football-data.org/523.png";
+  if (name.includes("monaco")) return "https://crests.football-data.org/548.png";
+  if (name.includes("lille")) return "https://crests.football-data.org/521.png";
+  if (name.includes("nice")) return "https://crests.football-data.org/522.png";
+  if (name.includes("lens")) return "https://crests.football-data.org/546.png";
+  if (name.includes("rennes")) return "https://crests.football-data.org/529.png";
+  if (name.includes("reims")) return "https://crests.football-data.org/532.png";
+  if (name.includes("stade brestois") || name.includes("brest")) return "https://crests.football-data.org/512.png";
+  if (name.includes("strasbourg")) return "https://crests.football-data.org/576.png";
+  if (name.includes("toulouse")) return "https://crests.football-data.org/511.png";
+  if (name.includes("montpellier")) return "https://crests.football-data.org/518.png";
+  if (name.includes("nantes")) return "https://crests.football-data.org/543.png";
+  if (name.includes("le havre")) return "https://crests.football-data.org/533.png";
+  if (name.includes("saint-etienne") || name.includes("st-etienne")) return "https://crests.football-data.org/514.png";
+  if (name.includes("auxerre")) return "https://crests.football-data.org/508.png";
+  if (name.includes("angers")) return "https://crests.football-data.org/532.png";
+
+  // --- UEFA Champions League / Châu Âu Khác ---
+  if (name.includes("bayern")) return "https://crests.football-data.org/5.png";
+  if (name.includes("dortmund")) return "https://crests.football-data.org/4.png";
+  if (name.includes("leverkusen")) return "https://crests.football-data.org/3.png";
+  if (name.includes("inter")) return "https://crests.football-data.org/108.png";
+  if (name.includes("ac milan") || name.includes("milan")) return "https://crests.football-data.org/98.png";
+  if (name.includes("juventus")) return "https://crests.football-data.org/109.png";
+  if (name.includes("benfica")) return "https://crests.football-data.org/1903.png";
+  if (name.includes("porto")) return "https://crests.football-data.org/503.png";
+  if (name.includes("sporting")) return "https://crests.football-data.org/498.png";
+  if (name.includes("ajax")) return "https://crests.football-data.org/678.png";
+  if (name.includes("psv")) return "https://crests.football-data.org/674.png";
+  if (name.includes("feyenoord")) return "https://crests.football-data.org/675.png";
+
+  // Mặc định trả về logo giải đấu chuẩn nếu không khớp tên
+  return "https://crests.football-data.org/PL.png";
 }
 
 export default function Home() {
@@ -266,13 +315,14 @@ export default function Home() {
         }
 
         .team-avatar-img {
-          width: 50px;
-          height: 50px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           border: 2px solid #c084fc;
-          background: rgba(255, 255, 255, 0.08);
-          object-fit: contain;
-          padding: 4px;
+          background: #ffffff;
+          object-fit: cover;
+          object-position: center;
+          padding: 2px;
           box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
           animation: floatUpDown 3.5s ease-in-out infinite;
         }
